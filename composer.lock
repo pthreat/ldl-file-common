@@ -1,0 +1,62 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "d6a39e91ad807e7a6128aec6c94f5340",
+    "packages": [
+        {
+            "name": "ldl-framework/typed-collection",
+            "version": "v0.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pthreat/ldl-typed-collection.git",
+                "reference": "1e0bd3ea1cd198a5dae133cb2cbb264dd4bc1137"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pthreat/ldl-typed-collection/zipball/1e0bd3ea1cd198a5dae133cb2cbb264dd4bc1137",
+                "reference": "1e0bd3ea1cd198a5dae133cb2cbb264dd4bc1137",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "LDL\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Federico Stange",
+                    "email": "jpfstange@gmail.com"
+                }
+            ],
+            "description": "Adds support for typed collections",
+            "homepage": "https://github.com/pthreat/ldl-type",
+            "keywords": [
+                "collection",
+                "php",
+                "type"
+            ],
+            "time": "2020-07-20T01:32:47+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=7.1"
+    },
+    "platform-dev": []
+}

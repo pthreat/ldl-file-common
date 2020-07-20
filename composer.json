@@ -1,0 +1,30 @@
+{
+    "name": "ldl-framework/file-common",
+    "type": "library",
+    "description": "Common classes for handling files",
+    "keywords": [
+        "FS",
+        "Filesystem",
+	"files",
+	"type",
+	"handling",
+	"collection"
+    ],
+    "homepage": "https://github.com/pthreat/ldl-file-common",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Federico Stange",
+            "email": "jpfstange@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+	"ldl-framework/typed-collection": "^0.0.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "LDL\\": "src/"
+        }
+    }
+}
