@@ -14,7 +14,8 @@ class ReadWriteFileCollection extends ObjectCollection
         parent::__construct($items);
         $this->getValidatorChain()
             ->append(new ReadableFileValidator())
-            ->append(new WritableFileValidator());
+            ->append(new WritableFileValidator())
+            ->lock();
     }
 
 }

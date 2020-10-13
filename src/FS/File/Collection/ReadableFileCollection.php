@@ -11,7 +11,9 @@ class ReadableFileCollection extends ObjectCollection
     public function __construct(iterable $items = null)
     {
         parent::__construct($items);
-        $this->getValidatorChain()->append(new ReadableFileValidator());
+        $this->getValidatorChain()
+            ->append(new ReadableFileValidator())
+            ->lock();
     }
 
 }

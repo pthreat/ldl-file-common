@@ -11,7 +11,9 @@ class WritableFileCollection extends ObjectCollection
     public function __construct(iterable $items = null)
     {
         parent::__construct($items);
-        $this->getValidatorChain()->append(new WritableFileValidator());
+        $this->getValidatorChain()
+            ->append(new WritableFileValidator())
+            ->lock();
     }
 
 }
