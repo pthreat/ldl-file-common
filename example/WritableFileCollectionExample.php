@@ -3,7 +3,6 @@
 require '../vendor/autoload.php';
 
 use LDL\FS\File\Collection\WritableFileCollection;
-use LDL\FS\Type\Types\Generic\GenericFileType;
 use LDL\FS\File\Collection\Validator\Exception\WritableFileValidatorException;
 
 echo sprintf(
@@ -51,7 +50,7 @@ for($i = 0; $i < 10; $i++){
             echo "Exception must be thrown\n";
         }
 
-        $wfc->append(new GenericFileType($file));
+        $wfc->append(new \SplFileInfo($file));
 
     }catch(WritableFileValidatorException $e){
         echo "EXCEPTION: {$e->getMessage()}\n";

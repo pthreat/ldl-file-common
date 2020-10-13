@@ -3,18 +3,9 @@
 require '../vendor/autoload.php';
 
 use LDL\FS\File\Collection\ReadableFileCollection;
-use LDL\FS\Type\Types\Generic\GenericFileType;
 use LDL\FS\File\Collection\Validator\Exception\ReadableFileValidatorException;
 
-$rfc = new ReadableFileCollection();
-
 $tmpDir = sprintf('%s%s%s',sys_get_temp_dir(), \DIRECTORY_SEPARATOR, 'ldl_fs_example');
-
-echo sprintf(
-    'Create "%s" instance%s',
-    ReadableFileCollection::class,
-    "\n\n"
-);
 
 if(is_dir($tmpDir)){
     $files = glob("$tmpDir/*");
@@ -29,6 +20,14 @@ if(is_dir($tmpDir)){
 if (!mkdir($tmpDir, 0755) && !is_dir($tmpDir)) {
     throw new \RuntimeException(sprintf('Directory "%s" was not created', $tmpDir));
 }
+
+echo sprintf(
+    'Create "%s" instance%s',
+    ReadableFileCollection::class,
+    "\n\n"
+);
+
+$rfc = new ReadableFileCollection();
 
 $permissions = [
     0444, //Readable
@@ -51,7 +50,7 @@ for($i = 0; $i < 10; $i++){
             echo "Exception must be thrown\n";
         }
 
-        $rfc->append(new GenericFileType($file));
+        $rfc->append(new \SplFileInfo($file));
 
     }catch(ReadableFileValidatorException $e){
         echo "EXCEPTION: {$e->getMessage()}\n";

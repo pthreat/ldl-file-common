@@ -13,7 +13,7 @@ class WritableFileValidator extends AbstractFileValidator implements AppendItemV
 
         if(!file_exists($item)){
             $msg = "File \"$item\" does not exists";
-            throw new Exception\WritableFileValidatorException($msg);
+            throw new Exception\FileNotFoundException($msg);
         }
 
         if(is_writable($item)){

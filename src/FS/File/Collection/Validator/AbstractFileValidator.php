@@ -41,6 +41,6 @@ abstract class AbstractFileValidator
             \SplFileInfo::class
         );
 
-        throw new Exception\FileValidatorException($msg);
+        throw new \InvalidArgumentException($msg);
     }
 }
