@@ -6,7 +6,7 @@ use LDL\FS\File\Collection\Validator\ReadableFileValidator;
 use LDL\FS\File\Collection\Validator\WritableFileValidator;
 use LDL\Type\Collection\Types\Object\ObjectCollection;
 
-class ReadWriteFileCollection extends ObjectCollection
+final class ReadWriteFileCollection extends ObjectCollection
 {
 
     public function __construct(iterable $items = null)

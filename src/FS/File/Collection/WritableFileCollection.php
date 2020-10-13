@@ -5,7 +5,7 @@ namespace LDL\FS\File\Collection;
 use LDL\FS\File\Collection\Validator\WritableFileValidator;
 use LDL\Type\Collection\Types\Object\ObjectCollection;
 
-class WritableFileCollection extends ObjectCollection
+final class WritableFileCollection extends ObjectCollection
 {
 
     public function __construct(iterable $items = null)
