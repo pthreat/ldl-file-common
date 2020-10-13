@@ -18,9 +18,11 @@
             "email": "jpfstange@gmail.com"
         }
     ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
-        "php": ">=7.1",
-	"ldl-framework/typed-collection": "^0.0.1"
+        "php": ">=7.3",
+        "ldl-framework/typed-collection": "dev-master"
     },
     "autoload": {
         "psr-4": {

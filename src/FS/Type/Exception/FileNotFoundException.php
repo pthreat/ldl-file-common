@@ -2,6 +2,6 @@
 
 namespace LDL\FS\Type\Exception;
 
-class PermissionDeniedException extends FileTypeException
+class FileNotFoundException extends FileTypeException
 {
 }
