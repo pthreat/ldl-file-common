@@ -2,7 +2,9 @@
 
 namespace LDL\FS\File\Collection\Validator;
 
-abstract class AbstractFileValidator
+use LDL\Type\Collection\Interfaces\Validation\ValueValidatorInterface;
+
+abstract class AbstractFileValidator implements ValueValidatorInterface
 {
     private $convertSplFileInfoToString;
 

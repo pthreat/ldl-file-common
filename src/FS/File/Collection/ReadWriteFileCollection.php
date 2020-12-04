@@ -14,7 +14,7 @@ final class ReadWriteFileCollection extends ObjectCollection
     public function __construct(iterable $items = null)
     {
         parent::__construct($items);
-        $this->getValidatorChain()
+        $this->getValueValidatorChain()
             ->append(new ClassComplianceItemValidator(\SplFileInfo::class))
             ->append(new FileExistsValidator())
             ->append(new ReadableFileValidator())

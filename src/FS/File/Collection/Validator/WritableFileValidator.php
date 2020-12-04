@@ -7,7 +7,7 @@ use LDL\Type\Collection\Interfaces\Validation\AppendItemValidatorInterface;
 
 class WritableFileValidator extends AbstractFileValidator implements AppendItemValidatorInterface
 {
-    public function validate(CollectionInterface $collection, $item, $key): void
+    public function validateValue(CollectionInterface $collection, $item, $key): void
     {
         $item = $this->getFilename($item);
 

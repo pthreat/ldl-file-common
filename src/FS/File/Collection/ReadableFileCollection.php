@@ -14,7 +14,7 @@ final class ReadableFileCollection extends ObjectCollection
     {
         parent::__construct($items);
 
-        $this->getValidatorChain()
+        $this->getValueValidatorChain()
             ->append(new ClassComplianceItemValidator(\SplFileInfo::class))
             ->append(new FileExistsValidator())
             ->append(new ReadableFileValidator())
