@@ -2,30 +2,78 @@
 
 namespace LDL\FS\File\Collection\Validator;
 
-use LDL\Type\Collection\Interfaces\CollectionInterface;
-use LDL\Type\Collection\Interfaces\Validation\AppendItemValidatorInterface;
+use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
+use LDL\FS\Util\FileValidatorHelper;
+use LDL\Validators\Config\BasicValidatorConfig;
+use LDL\Validators\Config\ValidatorConfigInterface;
+use LDL\Validators\HasValidatorConfigInterface;
+use LDL\Validators\ValidatorInterface;
 
-class JsonFileValidator extends AbstractFileValidator implements AppendItemValidatorInterface
+class JsonFileValidator implements ValidatorInterface, HasValidatorConfigInterface
 {
-    public function validateValue(CollectionInterface $collection, $item, $key): void
+    /**
+     * @var BasicValidatorConfig
+     */
+    private $config;
+
+    public function __construct(bool $strict = true)
     {
-        $file = $this->getFilename($item);
+        $this->config = new BasicValidatorConfig($strict);
+    }
+
+    /**
+     * @param string $item
+     * @param null $key
+     * @param CollectionInterface|null $collection
+     * @throws Exception\JsonFileDecodeException
+     */
+    public function validate($item, $key = null, CollectionInterface $collection = null): void
+    {
+        $path = FileValidatorHelper::getFilename($item);
 
         try {
-
-            $content = file_get_contents($file);
+            $content = file_get_contents($path);
             json_decode($content, false, 2048, \JSON_THROW_ON_ERROR);
 
         }catch (\Exception $e){
 
             $msg = sprintf(
                 'Could not decode file "%s" as JSON, Decode error: %s',
-                $item,
+                $path,
                 $e->getMessage()
             );
 
             throw new Exception\JsonFileDecodeException($msg);
-
         }
+    }
+
+    /**
+     * @param ValidatorConfigInterface $config
+     * @return ValidatorInterface
+     * @throws \InvalidArgumentException
+     */
+    public static function fromConfig(ValidatorConfigInterface $config): ValidatorInterface
+    {
+        if(false === $config instanceof BasicValidatorConfig){
+            $msg = sprintf(
+                'Config expected to be %s, config of class %s was given',
+                __CLASS__,
+                get_class($config)
+            );
+            throw new \InvalidArgumentException($msg);
+        }
+
+        /**
+         * @var BasicValidatorConfig $config
+         */
+        return new self($config->isStrict());
+    }
+
+    /**
+     * @return BasicValidatorConfig
+     */
+    public function getConfig(): BasicValidatorConfig
+    {
+        return $this->config;
     }
 }

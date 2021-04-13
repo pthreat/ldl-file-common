@@ -2,11 +2,10 @@
 
 namespace LDL\FS\Util;
 
-class Path{
-
+class Path
+{
     public static function make(...$args) : string
     {
         return implode(\DIRECTORY_SEPARATOR, $args);
     }
-
 }

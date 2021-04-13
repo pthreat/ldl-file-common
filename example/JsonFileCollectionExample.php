@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-require '../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 use LDL\FS\File\Collection\JsonFileCollection;
 use LDL\FS\File\Collection\Validator\Exception\JsonFileDecodeException;
@@ -30,7 +30,6 @@ file_put_contents($file, json_encode($json,\JSON_THROW_ON_ERROR));
 
 echo "Append JSON file to the collection ...\n";
 $jsonCollection->append(new \SplFileInfo($file));
-
 try {
 
     echo "Append regular file to the collection, exception must be thrown\n";
