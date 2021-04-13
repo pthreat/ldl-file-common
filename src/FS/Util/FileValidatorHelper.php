@@ -1,25 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace LDL\FS\File\Collection\Validator;
+namespace LDL\FS\Util;
 
-use LDL\Type\Collection\Interfaces\Validation\ValueValidatorInterface;
-
-abstract class AbstractFileValidator implements ValueValidatorInterface
+abstract class FileValidatorHelper
 {
-    private $convertSplFileInfoToString;
-
-    public function __construct(bool $convertSplFileInfoToString=true)
-    {
-        $this->convertSplFileInfoToString = $convertSplFileInfoToString;
-    }
-
-    protected function getFilename($value) : ?string
+    public static function getFilename($value, bool $convertSplFileInfoToString=true) : ?string
     {
         if(is_string($value)){
             return $value;
         }
 
-        if($this->convertSplFileInfoToString && is_object($value)){
+        if($convertSplFileInfoToString && is_object($value)){
 
             if($value instanceof \SplFileInfo){
                 return (string) $value->getRealPath();
