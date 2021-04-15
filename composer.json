@@ -22,8 +22,8 @@
     "prefer-stable": true,
     "require": {
         "php": ">=7.3",
-        "ldl-framework/typed-collection": "dev-master",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ldl-framework/validators": "dev-master"
     },
     "autoload": {
         "psr-4": {

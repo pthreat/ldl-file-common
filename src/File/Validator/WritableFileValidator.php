@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace LDL\FS\File\Collection\Validator;
+namespace LDL\File\Validator;
 
 use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
 use LDL\FS\Util\FileValidatorHelper;
@@ -9,7 +9,7 @@ use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class ReadableFileValidator implements ValidatorInterface, HasValidatorConfigInterface
+class WritableFileValidator implements ValidatorInterface, HasValidatorConfigInterface
 {
     /**
      * @var BasicValidatorConfig
@@ -25,18 +25,24 @@ class ReadableFileValidator implements ValidatorInterface, HasValidatorConfigInt
      * @param mixed $item
      * @param null $key
      * @param CollectionInterface|null $collection
-     * @throws Exception\ReadableFileValidatorException
+     * @throws Exception\FileNotFoundException
+     * @throws Exception\WritableFileValidatorException
      */
     public function validate($item, $key = null, CollectionInterface $collection = null): void
     {
         $path = FileValidatorHelper::getFilename($item);
 
-        if(is_readable($path)){
+        if(!file_exists($path)){
+            $msg = "File \"$path\" does not exists";
+            throw new Exception\FileNotFoundException($msg);
+        }
+
+        if(is_writable($path)){
             return;
         }
 
-        $msg = "File \"$item\" is not readable!\n";
-        throw new Exception\ReadableFileValidatorException($msg);
+        $msg = "File \"$path\" is not writable!\n";
+        throw new Exception\WritableFileValidatorException($msg);
     }
 
     /**

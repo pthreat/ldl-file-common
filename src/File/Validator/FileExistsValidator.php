@@ -1,9 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace LDL\FS\File\Collection\Validator;
+namespace LDL\File\Validator;
 
 use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
-use LDL\FS\Util\FileValidatorHelper;
 use LDL\Validators\Config\BasicValidatorConfig;
 use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\HasValidatorConfigInterface;
@@ -22,15 +21,13 @@ class FileExistsValidator implements ValidatorInterface, HasValidatorConfigInter
     }
 
     /**
-     * @param string $item
+     * @param string $path
      * @param null $key
      * @param CollectionInterface|null $collection
      * @throws Exception\FileNotFoundException
      */
-    public function validate($item, $key = null, CollectionInterface $collection = null): void
+    public function validate($path, $key = null, CollectionInterface $collection = null): void
     {
-        $path = FileValidatorHelper::getFilename($item);
-
         if(file_exists($path)){
             return;
         }

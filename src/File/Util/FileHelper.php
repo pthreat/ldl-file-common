@@ -1,9 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace LDL\FS\Util;
+namespace LDL\File\Util;
 
-abstract class FileValidatorHelper
+abstract class FileHelper
 {
+
+    public static function createPath(...$args) : string
+    {
+        return implode(\DIRECTORY_SEPARATOR, $args);
+    }
+
     public static function getFilename($value, bool $convertSplFileInfoToString=true) : ?string
     {
         if(is_string($value)){
