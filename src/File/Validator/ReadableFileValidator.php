@@ -1,15 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace LDL\FS\File\Collection\Validator;
+namespace LDL\File\Validator;
 
 use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
-use LDL\FS\Util\FileValidatorHelper;
 use LDL\Validators\Config\BasicValidatorConfig;
 use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class JsonFileValidator implements ValidatorInterface, HasValidatorConfigInterface
+class ReadableFileValidator implements ValidatorInterface, HasValidatorConfigInterface
 {
     /**
      * @var BasicValidatorConfig
@@ -22,29 +21,19 @@ class JsonFileValidator implements ValidatorInterface, HasValidatorConfigInterfa
     }
 
     /**
-     * @param string $item
+     * @param string $path
      * @param null $key
      * @param CollectionInterface|null $collection
-     * @throws Exception\JsonFileDecodeException
+     * @throws Exception\ReadableFileValidatorException
      */
-    public function validate($item, $key = null, CollectionInterface $collection = null): void
+    public function validate($path, $key = null, CollectionInterface $collection = null): void
     {
-        $path = FileValidatorHelper::getFilename($item);
-
-        try {
-            $content = file_get_contents($path);
-            json_decode($content, false, 2048, \JSON_THROW_ON_ERROR);
-
-        }catch (\Exception $e){
-
-            $msg = sprintf(
-                'Could not decode file "%s" as JSON, Decode error: %s',
-                $path,
-                $e->getMessage()
-            );
-
-            throw new Exception\JsonFileDecodeException($msg);
+        if(is_readable($path)){
+            return;
         }
+
+        $msg = "File \"$path\" is not readable!\n";
+        throw new Exception\ReadableFileValidatorException($msg);
     }
 
     /**

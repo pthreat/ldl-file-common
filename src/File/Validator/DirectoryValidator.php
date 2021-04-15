@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace LDL\FS\File\Collection\Validator;
+namespace LDL\File\Validator;
 
+use LDL\File\Validator\Exception\FileValidatorException;
 use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
-use LDL\FS\Util\FileValidatorHelper;
 use LDL\Validators\Config\BasicValidatorConfig;
 use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class ReadableFileValidator implements ValidatorInterface, HasValidatorConfigInterface
+class DirectoryValidator implements ValidatorInterface, HasValidatorConfigInterface
 {
     /**
      * @var BasicValidatorConfig
@@ -22,21 +22,26 @@ class ReadableFileValidator implements ValidatorInterface, HasValidatorConfigInt
     }
 
     /**
-     * @param mixed $item
+     * @param string $path
      * @param null $key
      * @param CollectionInterface|null $collection
-     * @throws Exception\ReadableFileValidatorException
+     * @throws FileValidatorException
+     * @throws Exception\FileNotFoundException
      */
-    public function validate($item, $key = null, CollectionInterface $collection = null): void
+    public function validate($path, $key = null, CollectionInterface $collection = null): void
     {
-        $path = FileValidatorHelper::getFilename($item);
+        $path = realpath($path);
 
-        if(is_readable($path)){
+        if(false === $path){
+            throw new Exception\FileValidatorException('Provided file is not a valid file');
+        }
+
+        if(is_dir($path)){
             return;
         }
 
-        $msg = "File \"$item\" is not readable!\n";
-        throw new Exception\ReadableFileValidatorException($msg);
+        $msg = "File \"$path\" is not a directory";
+        throw new Exception\FileNotFoundException($msg);
     }
 
     /**

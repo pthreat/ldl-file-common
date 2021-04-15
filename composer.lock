@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b27c349e20868eb4337594586fc6e26f",
+    "content-hash": "5b381107f0351f92d1dd49560f9d2e0a",
     "packages": [
         {
             "name": "ldl-framework/framework-base",
@@ -12,17 +12,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/pthreat/ldl-framework-base.git",
-                "reference": "c3cafb7ab2d223c96470712f536c3e457da715ea"
+                "reference": "08878076a4935887c64ba9bf199257413174bf2e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pthreat/ldl-framework-base/zipball/c3cafb7ab2d223c96470712f536c3e457da715ea",
-                "reference": "c3cafb7ab2d223c96470712f536c3e457da715ea",
+                "url": "https://api.github.com/repos/pthreat/ldl-framework-base/zipball/08878076a4935887c64ba9bf199257413174bf2e",
+                "reference": "08878076a4935887c64ba9bf199257413174bf2e",
                 "shasum": ""
             },
             "require": {
                 "symfony/var-dumper": "^5.2"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -41,7 +42,11 @@
                 }
             ],
             "description": "LDL Framework base contracts and exceptions",
-            "time": "2021-04-09T14:25:37+00:00"
+            "support": {
+                "issues": "https://github.com/pthreat/ldl-framework-base/issues",
+                "source": "https://github.com/pthreat/ldl-framework-base/tree/feature/1200197097272268"
+            },
+            "time": "2021-04-14T18:36:58+00:00"
         },
         {
             "name": "ldl-framework/typed-collection",
@@ -63,6 +68,7 @@
                 "ldl-framework/validators": "dev-master",
                 "php": ">=7.3"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -86,6 +92,10 @@
                 "php",
                 "type"
             ],
+            "support": {
+                "issues": "https://github.com/pthreat/ldl-typed-collection/issues",
+                "source": "https://github.com/pthreat/ldl-typed-collection/tree/fix/1200190593143576"
+            },
             "time": "2021-04-13T16:28:02+00:00"
         },
         {
@@ -94,12 +104,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/pthreat/ldl-validators.git",
-                "reference": "b7ff5e1093942f75193ae493cb21f73a738b419b"
+                "reference": "9e422f9935bdd6db5b359346a78f744fb32f7d93"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pthreat/ldl-validators/zipball/b7ff5e1093942f75193ae493cb21f73a738b419b",
-                "reference": "b7ff5e1093942f75193ae493cb21f73a738b419b",
+                "url": "https://api.github.com/repos/pthreat/ldl-validators/zipball/9e422f9935bdd6db5b359346a78f744fb32f7d93",
+                "reference": "9e422f9935bdd6db5b359346a78f744fb32f7d93",
                 "shasum": ""
             },
             "require": {
@@ -107,6 +117,7 @@
                 "ldl-framework/framework-base": "dev-master",
                 "php": ">=7.3"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -129,7 +140,11 @@
             ],
             "description": "LDL Framework validators",
             "homepage": "https://github.com/pthreat/ldl-validators",
-            "time": "2021-04-08T15:54:30+00:00"
+            "support": {
+                "issues": "https://github.com/pthreat/ldl-validators/issues",
+                "source": "https://github.com/pthreat/ldl-validators/tree/master"
+            },
+            "time": "2021-04-15T17:53:36+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -191,6 +206,23 @@
                 "polyfill",
                 "portable",
                 "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.22.1"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
             ],
             "time": "2021-01-22T09:19:47+00:00"
         },
@@ -257,6 +289,23 @@
                 "polyfill",
                 "portable",
                 "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.22.1"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
             ],
             "time": "2021-01-07T16:49:33+00:00"
         },
@@ -329,6 +378,23 @@
                 "debug",
                 "dump"
             ],
+            "support": {
+                "source": "https://github.com/symfony/var-dumper/tree/v5.2.6"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2021-03-28T09:42:18+00:00"
         }
     ],
@@ -344,5 +410,6 @@
         "php": ">=7.3",
         "ext-json": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.0.0"
 }

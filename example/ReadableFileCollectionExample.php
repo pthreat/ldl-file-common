@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-require __DIR__.'/../vendor/autoload.php';
+use LDL\File\Collection\ReadableFileCollection;
+use LDL\File\Validator\Exception\ReadableFileValidatorException;
 
-use LDL\FS\File\Collection\ReadableFileCollection;
-use LDL\FS\File\Collection\Validator\Exception\ReadableFileValidatorException;
+require __DIR__.'/../vendor/autoload.php';
 
 $tmpDir = sprintf('%s%s%s',sys_get_temp_dir(), \DIRECTORY_SEPARATOR, 'ldl_fs_example');
 
@@ -50,7 +50,7 @@ for($i = 0; $i < 10; $i++){
             echo "Exception must be thrown\n";
         }
 
-        $rfc->append(new \SplFileInfo($file));
+        $rfc->append($file);
 
     }catch(ReadableFileValidatorException $e){
         echo "EXCEPTION: {$e->getMessage()}\n";

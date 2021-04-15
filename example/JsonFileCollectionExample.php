@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-require __DIR__.'/../vendor/autoload.php';
+use LDL\File\Collection\JsonFileCollection;
+use LDL\File\Validator\Exception\JsonFileDecodeException;
 
-use LDL\FS\File\Collection\JsonFileCollection;
-use LDL\FS\File\Collection\Validator\Exception\JsonFileDecodeException;
+require __DIR__.'/../vendor/autoload.php';
 
 $tmpDir = sprintf('%s%s%s',sys_get_temp_dir(), \DIRECTORY_SEPARATOR, 'ldl_fs_example');
 
@@ -29,11 +29,11 @@ $file = sprintf('%s%s%s.txt', $tmpDir, \DIRECTORY_SEPARATOR, 'test.json');
 file_put_contents($file, json_encode($json,\JSON_THROW_ON_ERROR));
 
 echo "Append JSON file to the collection ...\n";
-$jsonCollection->append(new \SplFileInfo($file));
+$jsonCollection->append($file);
 try {
 
     echo "Append regular file to the collection, exception must be thrown\n";
-    $jsonCollection->append(new \SplFileInfo(__FILE__));
+    $jsonCollection->append(__FILE__);
 
 }catch(JsonFileDecodeException $e) {
 

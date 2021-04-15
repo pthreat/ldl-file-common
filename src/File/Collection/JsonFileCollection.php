@@ -1,15 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace LDL\FS\File\Collection;
+namespace LDL\File\Collection;
 
-use LDL\FS\File\Collection\Validator\FileExistsValidator;
-use LDL\FS\File\Collection\Validator\JsonFileValidator;
-use LDL\FS\File\Collection\Validator\ReadableFileValidator;
+use LDL\File\Validator\FileExistsValidator;
+use LDL\File\Validator\JsonFileValidator;
+use LDL\File\Validator\ReadableFileValidator;
+use LDL\Type\Collection\AbstractCollection;
 use LDL\Type\Collection\Traits\Validator\AppendValueValidatorChainTrait;
-use LDL\Type\Collection\Types\Object\ObjectCollection;
-use LDL\Validators\ClassComplianceValidator;
 
-class JsonFileCollection extends ObjectCollection
+final class JsonFileCollection extends AbstractCollection
 {
     use AppendValueValidatorChainTrait;
 
@@ -18,7 +17,6 @@ class JsonFileCollection extends ObjectCollection
         parent::__construct($items);
 
         $this->getAppendValueValidatorChain()
-            ->append(new ClassComplianceValidator(\SplFileInfo::class))
             ->append(new FileExistsValidator())
             ->append(new ReadableFileValidator())
             ->append(new JsonFileValidator())

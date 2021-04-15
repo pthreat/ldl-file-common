@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-require __DIR__.'/../vendor/autoload.php';
+use LDL\File\Collection\WritableFileCollection;
+use LDL\File\Validator\Exception\WritableFileValidatorException;
 
-use LDL\FS\File\Collection\WritableFileCollection;
-use LDL\FS\File\Collection\Validator\Exception\WritableFileValidatorException;
+require __DIR__.'/../vendor/autoload.php';
 
 echo sprintf(
     'Create "%s" instance%s',
@@ -50,7 +50,7 @@ for($i = 0; $i < 10; $i++){
             echo "Exception must be thrown\n";
         }
 
-        $wfc->append(new \SplFileInfo($file));
+        $wfc->append($file);
 
     }catch(WritableFileValidatorException $e){
         echo "EXCEPTION: {$e->getMessage()}\n";

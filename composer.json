@@ -22,8 +22,9 @@
     "prefer-stable": true,
     "require": {
         "php": ">=7.3",
-        "ldl-framework/typed-collection": "dev-master",
-        "ext-json": "*"
+        "ext-json": "*",
+	"ldl-framework/typed-collection":"dev-master",
+        "ext-fileinfo": "*"
     },
     "autoload": {
         "psr-4": {
