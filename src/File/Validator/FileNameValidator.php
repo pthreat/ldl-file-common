@@ -2,43 +2,50 @@
 
 namespace LDL\File\Validator;
 
-use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class FileNameValidator implements ValidatorInterface, HasValidatorConfigInterface
+class FileNameValidator implements ValidatorInterface
 {
     /**
      * @var Config\FileNameValidatorConfig
      */
     private $config;
 
-    public function __construct(string $filename, bool $match = true, bool $strict = true)
+    public function __construct(string $filename, bool $negated=false, bool $dumpable=true)
     {
-        $this->config = new Config\FileNameValidatorConfig($filename, $match, $strict);
+        $this->config = new Config\FileNameValidatorConfig($filename, $negated, $dumpable);
     }
 
     /**
-     * @param string $path
-     * @param null $key
-     * @param CollectionInterface|null $collection
-     * @throws \LogicException
+     * @param mixed $path
+     * @throws \Exception
      */
-    public function validate($path, $key = null, CollectionInterface $collection = null): void
+    public function validate($path): void
+    {
+        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
+    }
+
+    public function assertTrue($path): void
     {
         $file = new \SplFileInfo($path);
-        $sameFilename = $file->getFilename() === $this->config->getFilename();
 
-        if($sameFilename && $this->config->isMatch()){
-            return;
-        }
-
-        if(!$sameFilename && !$this->config->isMatch()){
+        if($file->getFilename() === $this->config->getFilename()){
             return;
         }
 
         throw new \LogicException("File: \"$path\" does not match criteria");
+    }
+
+    public function assertFalse($path): void
+    {
+        $file = new \SplFileInfo($path);
+
+        if($file->getFilename() !== $this->config->getFilename()){
+            return;
+        }
+
+        throw new \LogicException("File: \"$path\" match criteria");
     }
 
     /**
@@ -62,8 +69,8 @@ class FileNameValidator implements ValidatorInterface, HasValidatorConfigInterfa
          */
         return new self(
             $config->getFilename(),
-            $config->isMatch(),
-            $config->isStrict()
+            $config->isNegated(),
+            $config->isDumpable()
         );
     }
 

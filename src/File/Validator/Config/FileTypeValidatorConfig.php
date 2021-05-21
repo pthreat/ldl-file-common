@@ -5,12 +5,12 @@ namespace LDL\File\Validator\Config;
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
 use LDL\Type\Collection\Types\String\UniqueStringCollection;
+use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\Config\ValidatorConfigInterfaceTrait;
 
 class FileTypeValidatorConfig implements ValidatorConfigInterface
 {
-    use ValidatorConfigInterfaceTrait;
+    use ValidatorConfigTrait;
 
     public const FILE_TYPE_REGULAR='regular';
     public const FILE_TYPE_DIRECTORY='directory';
@@ -26,15 +26,10 @@ class FileTypeValidatorConfig implements ValidatorConfigInterface
      */
     private $types;
 
-    /**
-     * @var bool
-     */
-    private $match;
-
     public function __construct(
         iterable $types,
-        bool $match=true,
-        bool $strict = true
+        bool $negated=false,
+        bool $dumpable=true
     )
     {
         $validTypes = new UniqueStringCollection([
@@ -71,17 +66,9 @@ class FileTypeValidatorConfig implements ValidatorConfigInterface
             );
         });
 
-        $this->match = $match;
         $this->types = $types;
-        $this->_isStrict = $strict;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMatch() : bool
-    {
-        return $this->match;
+        $this->_tNegated = $negated;
+        $this->_tDumpable = $dumpable;
     }
 
     /**
@@ -120,8 +107,8 @@ class FileTypeValidatorConfig implements ValidatorConfigInterface
         try{
             return new self(
                 $data['types'],
-                array_key_exists('match', $data) ? (bool)$data['match'] : true,
-                array_key_exists('strict', $data) ? (bool)$data['strict'] : true
+                array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
+                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true
             );
         }catch(\Exception $e){
             throw new ArrayFactoryException($e->getMessage());
@@ -135,8 +122,8 @@ class FileTypeValidatorConfig implements ValidatorConfigInterface
     {
         return [
             'types' => $this->types->toArray(),
-            'match' => $this->match,
-            'strict' => $this->_isStrict
+            'negated' => $this->_tNegated,
+            'dumpable' => $this->_tDumpable
         ];
     }
 }

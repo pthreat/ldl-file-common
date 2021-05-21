@@ -4,12 +4,12 @@ namespace LDL\File\Validator\Config;
 
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
+use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\Config\ValidatorConfigInterfaceTrait;
 
 class FileSizeValidatorConfig implements ValidatorConfigInterface
 {
-    use ValidatorConfigInterfaceTrait;
+    use ValidatorConfigTrait;
 
     public const OPERATOR_EQ='eq';
     public const OPERATOR_GT='gt';
@@ -27,7 +27,12 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface
      */
     private $operator;
 
-    public function __construct(int $bytes, string $operator, bool $strict = true)
+    public function __construct(
+        int $bytes,
+        string $operator,
+        bool $negated=false,
+        bool $dumpable=true
+    )
     {
         $operator = strtolower($operator);
 
@@ -52,7 +57,8 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface
 
         $this->operator = $operator;
         $this->bytes = $bytes;
-        $this->_isStrict = $strict;
+        $this->_tNegated = $negated;
+        $this->_tDumpable = $dumpable;
     }
 
     /**
@@ -95,7 +101,9 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface
             return new self(
                 (int) $data['bytes'],
                 (string) $data['operator'],
-                array_key_exists('strict', $data) ? (bool)$data['strict'] : true);
+                array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
+                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true
+            );
         }catch(\Exception $e){
             throw new ArrayFactoryException($e->getMessage());
         }
@@ -109,7 +117,8 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface
         return [
             'bytes' => $this->bytes,
             'operator' => $this->operator,
-            'strict' => $this->_isStrict
+            'negated' => $this->_tNegated,
+            'dumpable' => $this->_tDumpable
         ];
     }
 }

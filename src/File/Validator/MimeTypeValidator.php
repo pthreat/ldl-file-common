@@ -2,46 +2,50 @@
 
 namespace LDL\File\Validator;
 
-use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class MimeTypeValidator implements ValidatorInterface, HasValidatorConfigInterface
+class MimeTypeValidator implements ValidatorInterface
 {
     /**
      * @var Config\MimeTypeValidatorConfig
      */
     private $config;
 
-    public function __construct($types, bool $strict = true)
+    public function __construct($types, bool $negated=false, bool $dumpable=true)
     {
-        $this->config = new Config\MimeTypeValidatorConfig($types, $strict);
+        $this->config = new Config\MimeTypeValidatorConfig($types, $negated, $dumpable);
     }
 
     /**
-     * @param string $path
-     * @param null $key
-     * @param CollectionInterface|null $collection
-     * @throws \LogicException
+     * @param mixed $path
+     * @throws \Exception
      */
-    public function validate($path, $key = null, CollectionInterface $collection = null): void
+    public function validate($path): void
+    {
+        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
+    }
+
+    public function assertTrue($path): void
     {
         $mimeType = mime_content_type($path);
 
-        if($this->config->isMatch()){
-            if($this->config->getTypes()->hasValue($mimeType)){
-                return;
-            }
-
-            throw new \LogicException(
-                sprintf(
-                    '"%s" does not match given mime types: %s',
-                    $path,
-                    $this->config->getTypes()->implode(', ')
-                )
-            );
+        if($this->config->getTypes()->hasValue($mimeType)){
+            return;
         }
+
+        throw new \LogicException(
+            sprintf(
+                '"%s" does not match given mime types: %s',
+                $path,
+                $this->config->getTypes()->implode(', ')
+            )
+        );
+    }
+
+    public function assertFalse($path): void
+    {
+        $mimeType = mime_content_type($path);
 
         if(!$this->config->getTypes()->hasValue($mimeType)){
             return;

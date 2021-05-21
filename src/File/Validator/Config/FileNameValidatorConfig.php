@@ -4,32 +4,27 @@ namespace LDL\File\Validator\Config;
 
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
+use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\Config\ValidatorConfigInterfaceTrait;
 
 class FileNameValidatorConfig implements ValidatorConfigInterface
 {
-    use ValidatorConfigInterfaceTrait;
+    use ValidatorConfigTrait;
 
     /**
      * @var string
      */
     private $filename;
 
-    /**
-     * @var bool
-     */
-    private $match;
-
     public function __construct(
         string $filename,
-        bool $match = true,
-        bool $strict = true
+        bool $negated=false,
+        bool $dumpable=true
     )
     {
         $this->filename = $filename;
-        $this->match = $match;
-        $this->_isStrict = $strict;
+        $this->_tNegated = $negated;
+        $this->_tDumpable = $dumpable;
     }
 
     /**
@@ -38,14 +33,6 @@ class FileNameValidatorConfig implements ValidatorConfigInterface
     public function getFilename(): string
     {
         return $this->filename;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMatch(): bool
-    {
-        return $this->match;
     }
 
     /**
@@ -70,8 +57,8 @@ class FileNameValidatorConfig implements ValidatorConfigInterface
 
         return new self(
             $data['filename'],
-            $match = array_key_exists('match', $data) ? (bool)$data['match'] : true,
-            array_key_exists('strict', $data) ? (bool)$data['strict'] : true
+            array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
+            array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true
         );
     }
 
@@ -82,8 +69,8 @@ class FileNameValidatorConfig implements ValidatorConfigInterface
     {
         return [
             'filename' => $this->filename,
-            'match' => $this->match,
-            'strict' => $this->_isStrict
+            'negated' => $this->_tNegated,
+            'dumpable' => $this->_tDumpable
         ];
     }
 }

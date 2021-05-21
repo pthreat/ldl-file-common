@@ -4,10 +4,9 @@ namespace LDL\File\Validator;
 
 use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class FileSizeValidator implements ValidatorInterface, HasValidatorConfigInterface
+class FileSizeValidator implements ValidatorInterface
 {
     /**
      * @var Config\FileSizeValidatorConfig
@@ -17,19 +16,23 @@ class FileSizeValidator implements ValidatorInterface, HasValidatorConfigInterfa
     public function __construct(
         int $bytes,
         string $operator,
-        bool $strict = true
+        bool $negated=false,
+        bool $dumpable=true
     )
     {
-        $this->config = new Config\FileSizeValidatorConfig($bytes, $operator, $strict);
+        $this->config = new Config\FileSizeValidatorConfig($bytes, $operator, $negated, $dumpable);
     }
 
     /**
-     * @param string $path
-     * @param null $key
-     * @param CollectionInterface|null $collection
-     * @throws \LogicException
+     * @param mixed $path
+     * @throws \Exception
      */
-    public function validate($path, $key = null, CollectionInterface $collection = null): void
+    public function validate($path): void
+    {
+        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
+    }
+
+    public function assertTrue($path): void
     {
         $size = filesize($path);
 
@@ -60,6 +63,45 @@ class FileSizeValidator implements ValidatorInterface, HasValidatorConfigInterfa
         throw new \LogicException(
             sprintf(
                 'File size of: "%s" (size: %s), is not "%s" than %s bytes',
+                $path,
+                $size,
+                $this->config->getOperator(),
+                $this->config->getBytes()
+            )
+        );
+    }
+
+    public function assertFalse($path): void
+    {
+        $size = filesize($path);
+
+        switch($this->config->getOperator()){
+
+            case Config\FileSizeValidatorConfig::OPERATOR_EQ:
+                if($size !== $this->config->getBytes()){
+                    return;
+                }
+            case Config\FileSizeValidatorConfig::OPERATOR_GT:
+                if($size < $this->config->getBytes()){
+                    return;
+                }
+            case Config\FileSizeValidatorConfig::OPERATOR_GTE:
+                if($size <= $this->config->getBytes()){
+                    return;
+                }
+            case Config\FileSizeValidatorConfig::OPERATOR_LT:
+                if($size > $this->config->getBytes()){
+                    return;
+                }
+            case Config\FileSizeValidatorConfig::OPERATOR_LTE:
+                if($size >= $this->config->getBytes()){
+                    return;
+                }
+        }
+
+        throw new \LogicException(
+            sprintf(
+                'File size of: "%s" (size: %s), is "%s" than %s bytes',
                 $path,
                 $size,
                 $this->config->getOperator(),

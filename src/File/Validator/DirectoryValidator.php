@@ -3,32 +3,28 @@
 namespace LDL\File\Validator;
 
 use LDL\File\Validator\Exception\FileValidatorException;
-use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
 use LDL\Validators\Config\BasicValidatorConfig;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class DirectoryValidator implements ValidatorInterface, HasValidatorConfigInterface
+class DirectoryValidator implements ValidatorInterface
 {
     /**
      * @var BasicValidatorConfig
      */
     private $config;
 
-    public function __construct(bool $strict = true)
+    public function __construct(bool $negated=false, bool $dumpable=true)
     {
-        $this->config = new BasicValidatorConfig($strict);
+        $this->config = new BasicValidatorConfig($negated, $dumpable);
     }
 
     /**
-     * @param string $path
-     * @param null $key
-     * @param CollectionInterface|null $collection
+     * @param mixed $path
      * @throws FileValidatorException
      * @throws Exception\FileNotFoundException
      */
-    public function validate($path, $key = null, CollectionInterface $collection = null): void
+    public function validate($path): void
     {
         $path = realpath($path);
 
@@ -36,11 +32,26 @@ class DirectoryValidator implements ValidatorInterface, HasValidatorConfigInterf
             throw new Exception\FileValidatorException('Provided file is not a valid file');
         }
 
+        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
+    }
+
+    public function assertTrue($path): void
+    {
         if(is_dir($path)){
             return;
         }
 
         $msg = "File \"$path\" is not a directory";
+        throw new Exception\FileNotFoundException($msg);
+    }
+
+    public function assertFalse($path): void
+    {
+        if(!is_dir($path)){
+            return;
+        }
+
+        $msg = "File \"$path\" is a directory";
         throw new Exception\FileNotFoundException($msg);
     }
 
@@ -63,7 +74,7 @@ class DirectoryValidator implements ValidatorInterface, HasValidatorConfigInterf
         /**
          * @var BasicValidatorConfig $config
          */
-        return new self($config->isStrict());
+        return new self($config->isNegated(), $config->isDumpable());
     }
 
     /**

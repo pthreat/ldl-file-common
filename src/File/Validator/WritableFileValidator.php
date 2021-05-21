@@ -2,43 +2,53 @@
 
 namespace LDL\File\Validator;
 
-use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
 use LDL\Validators\Config\BasicValidatorConfig;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class WritableFileValidator implements ValidatorInterface, HasValidatorConfigInterface
+class WritableFileValidator implements ValidatorInterface
 {
     /**
      * @var BasicValidatorConfig
      */
     private $config;
 
-    public function __construct(bool $strict = true)
+    public function __construct(bool $negated=false, bool $dumpable=true)
     {
-        $this->config = new BasicValidatorConfig($strict);
+        $this->config = new BasicValidatorConfig($negated, $dumpable);
     }
 
     /**
-     * @param string $path
-     * @param null $key
-     * @param CollectionInterface|null $collection
-     * @throws Exception\FileNotFoundException
-     * @throws Exception\WritableFileValidatorException
+     * @param mixed $path
+     * @throws \Exception
      */
-    public function validate($path, $key = null, CollectionInterface $collection = null): void
+    public function validate($path): void
     {
         if(!file_exists($path)){
             $msg = "File \"$path\" does not exists";
             throw new Exception\FileNotFoundException($msg);
         }
 
+        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
+    }
+
+    public function assertTrue($path): void
+    {
         if(is_writable($path)){
             return;
         }
 
         $msg = "File \"$path\" is not writable!\n";
+        throw new Exception\WritableFileValidatorException($msg);
+    }
+
+    public function assertFalse($path): void
+    {
+        if(!is_writable($path)){
+            return;
+        }
+
+        $msg = "File \"$path\" is writable!\n";
         throw new Exception\WritableFileValidatorException($msg);
     }
 
@@ -61,7 +71,7 @@ class WritableFileValidator implements ValidatorInterface, HasValidatorConfigInt
         /**
          * @var BasicValidatorConfig $config
          */
-        return new self($config->isStrict());
+        return new self($config->isNegated(), $config->isDumpable());
     }
 
     /**

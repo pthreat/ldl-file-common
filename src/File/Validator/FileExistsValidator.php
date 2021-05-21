@@ -2,37 +2,48 @@
 
 namespace LDL\File\Validator;
 
-use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
 use LDL\Validators\Config\BasicValidatorConfig;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class FileExistsValidator implements ValidatorInterface, HasValidatorConfigInterface
+class FileExistsValidator implements ValidatorInterface
 {
     /**
      * @var BasicValidatorConfig
      */
     private $config;
 
-    public function __construct(bool $strict = true)
+    public function __construct(bool $negated=false, bool $dumpable=true)
     {
-        $this->config = new BasicValidatorConfig($strict);
+        $this->config = new BasicValidatorConfig($negated, $dumpable);
     }
 
     /**
-     * @param string $path
-     * @param null $key
-     * @param CollectionInterface|null $collection
-     * @throws Exception\FileNotFoundException
+     * @param mixed $path
+     * @throws \Exception
      */
-    public function validate($path, $key = null, CollectionInterface $collection = null): void
+    public function validate($path): void
+    {
+        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
+    }
+
+    public function assertTrue($path): void
     {
         if(file_exists($path)){
             return;
         }
 
         $msg = "File \"$path\" does not exists";
+        throw new Exception\FileNotFoundException($msg);
+    }
+
+    public function assertFalse($path): void
+    {
+        if(!file_exists($path)){
+            return;
+        }
+
+        $msg = "File \"$path\" must NOT exists";
         throw new Exception\FileNotFoundException($msg);
     }
 
@@ -55,7 +66,7 @@ class FileExistsValidator implements ValidatorInterface, HasValidatorConfigInter
         /**
          * @var BasicValidatorConfig $config
          */
-        return new self($config->isStrict());
+        return new self($config->isNegated(), $config->isDumpable());
     }
 
     /**

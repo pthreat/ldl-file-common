@@ -5,12 +5,12 @@ namespace LDL\File\Validator\Config;
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
 use LDL\Framework\Helper\RegexHelper;
+use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\Config\ValidatorConfigInterfaceTrait;
 
 class HasRegexContentValidatorConfig implements ValidatorConfigInterface
 {
-    use ValidatorConfigInterfaceTrait;
+    use ValidatorConfigTrait;
 
     /**
      * @var string
@@ -22,19 +22,19 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface
      */
     private $storeLine;
 
-    /**
-     * @var bool
-     */
-    private $match;
-
-    public function __construct(string $regex, bool $match = true, bool $storeLine = true, bool $strict = true)
+    public function __construct(
+        string $regex,
+        bool $storeLine = true,
+        bool $negated=false,
+        bool $dumpable=true
+    )
     {
         RegexHelper::validate($regex);
 
         $this->regex = $regex;
-        $this->match = $match;
         $this->storeLine = $storeLine;
-        $this->_isStrict = $strict;
+        $this->_tNegated = $negated;
+        $this->_tDumpable = $dumpable;
     }
 
     /**
@@ -43,14 +43,6 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface
     public function getRegex(): string
     {
         return $this->regex;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMatch(): bool
-    {
-        return $this->match;
     }
 
     /**
@@ -81,15 +73,15 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface
             throw new ArrayFactoryException($msg);
         }
 
-        $match = array_key_exists('match', $data) ? (bool) $data['match'] : true;
         $storeLine = array_key_exists('storeLine', $data) ? (bool) $data['storeLine'] : true;
 
         try{
             return new self(
                 (string) $data['regex'],
-                $match,
                 $storeLine,
-                array_key_exists('strict', $data) ? (bool)$data['strict'] : true);
+                array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
+                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true
+            );
         }catch(\Exception $e){
             throw new ArrayFactoryException($e->getMessage());
         }
@@ -102,9 +94,9 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface
     {
         return [
             'regex' => $this->regex,
-            'match' => $this->match,
             'storeLine' => $this->storeLine,
-            'strict' => $this->_isStrict
+            'negated' => $this->_tNegated,
+            'dumpable' => $this->_tDumpable
         ];
     }
 }
