@@ -3,10 +3,9 @@
 namespace LDL\File\Validator;
 
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class FileTypeValidator implements ValidatorInterface, HasValidatorConfigInterface
+class FileTypeValidator implements ValidatorInterface
 {
 
     /**
@@ -16,28 +15,28 @@ class FileTypeValidator implements ValidatorInterface, HasValidatorConfigInterfa
 
     /**
      *
-     * The match parameter specified if the regex should be matched or not, this is useful when you want to find
-     * files which DO NOT HAVE a certain string. If you set match to true, then only files which comply to the
+     * The negated parameter specified if the regex should be matched or not, this is useful when you want to find
+     * files which DO HAVE a certain string. If you set negated to true, then only files which NOT comply to the
      * regex will be shown.
      *
      * @param iterable $types
-     * @param bool $match
-     * @param bool $strict
+     * @param bool $negated
+     * @param bool $dumpable
      */
-    public function __construct(iterable $types, bool $match=true, bool $strict = true)
+    public function __construct(iterable $types, bool $negated=false, bool $dumpable=true)
     {
-        $this->config = new Config\FileTypeValidatorConfig($types, $match, $strict);
+        $this->config = new Config\FileTypeValidatorConfig($types, $negated, $dumpable);
     }
 
-    public function validate($value): void
+    public function validate($path): void
     {
-        $perms = fileperms($value);
+        $perms = fileperms($path);
 
         if(!$perms){
             throw new \InvalidArgumentException('Invalid file provided');
         }
 
-        switch (fileperms($value) & 0xF000) {
+        switch ($perms & 0xF000) {
             case 0xC000: // socket
                 $type = Config\FileTypeValidatorConfig::FILE_TYPE_SOCKET;
                 break;
@@ -63,15 +62,21 @@ class FileTypeValidator implements ValidatorInterface, HasValidatorConfigInterfa
                 $type = Config\FileTypeValidatorConfig::FILE_TYPE_UNKNOWN;
         }
 
-        if($this->config->isMatch()){
-            if($this->config->getTypes()->hasValue($type)){
-                return;
-            }
+        $this->config->isNegated() ? $this->assertFalse($type) : $this->assertTrue($type);
+    }
 
-            throw new \InvalidArgumentException('File type criteria not satisfied');
+    public function assertTrue($value): void
+    {
+        if($this->config->getTypes()->hasValue($value)){
+            return;
         }
 
-        if(!$this->config->getTypes()->hasValue($type)){
+        throw new \InvalidArgumentException('File type criteria not satisfied');
+    }
+
+    public function assertFalse($value): void
+    {
+        if(!$this->config->getTypes()->hasValue($value)){
             return;
         }
 
@@ -99,8 +104,8 @@ class FileTypeValidator implements ValidatorInterface, HasValidatorConfigInterfa
          */
         return new self(
             $config->getTypes(),
-            $config->isMatch(),
-            $config->isStrict()
+            $config->isNegated(),
+            $config->isDumpable()
         );
     }
 

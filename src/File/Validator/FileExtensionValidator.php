@@ -2,43 +2,50 @@
 
 namespace LDL\File\Validator;
 
-use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
 use LDL\Validators\Config\ValidatorConfigInterface;
-use LDL\Validators\HasValidatorConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class FileExtensionValidator implements ValidatorInterface, HasValidatorConfigInterface
+class FileExtensionValidator implements ValidatorInterface
 {
     /**
      * @var Config\FileExtensionValidatorConfig
      */
     private $config;
 
-    public function __construct(string $extension, bool $match = true, bool $strict = true)
+    public function __construct(string $extension, bool $negated=false, bool $dumpable=true)
     {
-        $this->config = new Config\FileExtensionValidatorConfig($extension, $match, $strict);
+        $this->config = new Config\FileExtensionValidatorConfig($extension, $negated, $dumpable);
     }
 
     /**
-     * @param string $path
-     * @param null $key
-     * @param CollectionInterface|null $collection
-     * @throws \LogicException
+     * @param mixed $path
+     * @throws \Exception
      */
-    public function validate($path, $key = null, CollectionInterface $collection = null): void
+    public function validate($path): void
+    {
+        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
+    }
+
+    public function assertTrue($path): void
     {
         $file = new \SplFileInfo($path);
-        $sameExtension = $file->getExtension() === $this->config->getExtension();
 
-        if($sameExtension && $this->config->isMatch()){
+        if($file->getExtension() === $this->config->getExtension()){
             return;
         }
 
-        if(!$sameExtension && !$this->config->isMatch()){
+        throw new \LogicException("File: \"$path\" does NOT match criteria");
+    }
+
+    public function assertFalse($path): void
+    {
+        $file = new \SplFileInfo($path);
+
+        if($file->getExtension() !== $this->config->getExtension()){
             return;
         }
 
-        throw new \LogicException("File: \"$path\" does not match criteria");
+        throw new \LogicException("File: \"$path\" match criteria");
     }
 
     /**
@@ -62,8 +69,8 @@ class FileExtensionValidator implements ValidatorInterface, HasValidatorConfigIn
          */
         return new self(
             $config->getExtension(),
-            $config->isMatch(),
-            $config->isStrict()
+            $config->isNegated(),
+            $config->isDumpable()
         );
     }
 
