@@ -28,15 +28,23 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
      * @param bool $storeLine
      * @param bool $negated
      * @param bool $dumpable
+     * @param string|null $description
      */
     public function __construct(
         string $regex,
         bool $storeLine = true,
         bool $negated=false,
-        bool $dumpable=true
+        bool $dumpable=true,
+        string $description=null
     )
     {
-        $this->config = new Config\HasRegexContentValidatorConfig($regex, $storeLine, $negated, $dumpable);
+        $this->config = new Config\HasRegexContentValidatorConfig(
+            $regex,
+            $storeLine,
+            $negated,
+            $dumpable,
+            $description
+        );
     }
 
     /**
@@ -58,7 +66,7 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
         $lineNo = 0;
         $hasMatches = false;
 
-        $fp = @fopen($path, 'rb+');
+        $fp = @fopen($path, 'rb');
 
         while($line  = fgets($fp)){
             $lineNo++;
@@ -83,7 +91,7 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
         $lineNo = 0;
         $hasMatches = false;
 
-        $fp = @fopen($path, 'rb+');
+        $fp = @fopen($path, 'rb');
 
         while($line  = fgets($fp)){
             $lineNo++;
@@ -131,7 +139,8 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
             $config->getRegex(),
             $config->isStoreLine(),
             $config->isNegated(),
-            $config->isDumpable()
+            $config->isDumpable(),
+            $config->getDescription()
         );
     }
 

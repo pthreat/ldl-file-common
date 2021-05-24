@@ -13,9 +13,9 @@ class ReadableFileValidator implements ValidatorInterface
      */
     private $config;
 
-    public function __construct(bool $negated=false, bool $dumpable=true)
+    public function __construct(bool $negated=false, bool $dumpable=true, string $description=null)
     {
-        $this->config = new BasicValidatorConfig($negated, $dumpable);
+        $this->config = new BasicValidatorConfig($negated, $dumpable, $description);
     }
 
     /**
@@ -66,7 +66,7 @@ class ReadableFileValidator implements ValidatorInterface
         /**
          * @var BasicValidatorConfig $config
          */
-        return new self($config->isNegated(), $config->isDumpable());
+        return new self($config->isNegated(), $config->isDumpable(), $config->getDescription());
     }
 
     /**

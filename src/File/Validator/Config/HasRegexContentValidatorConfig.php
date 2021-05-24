@@ -26,7 +26,8 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface
         string $regex,
         bool $storeLine = true,
         bool $negated=false,
-        bool $dumpable=true
+        bool $dumpable=true,
+        string $description=null
     )
     {
         RegexHelper::validate($regex);
@@ -35,6 +36,7 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface
         $this->storeLine = $storeLine;
         $this->_tNegated = $negated;
         $this->_tDumpable = $dumpable;
+        $this->_tDescription = $description;
     }
 
     /**
@@ -80,7 +82,8 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface
                 (string) $data['regex'],
                 $storeLine,
                 array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
-                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true
+                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true,
+                array_key_exists('description', $data) ? (string)$data['description'] : null
             );
         }catch(\Exception $e){
             throw new ArrayFactoryException($e->getMessage());
@@ -96,7 +99,8 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface
             'regex' => $this->regex,
             'storeLine' => $this->storeLine,
             'negated' => $this->_tNegated,
-            'dumpable' => $this->_tDumpable
+            'dumpable' => $this->_tDumpable,
+            'description' => $this->_tDescription
         ];
     }
 }

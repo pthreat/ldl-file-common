@@ -20,7 +20,8 @@ class MimeTypeValidatorConfig implements ValidatorConfigInterface
     public function __construct(
         $types,
         bool $negated=false,
-        bool $dumpable=true
+        bool $dumpable=true,
+        string $description=null
     )
     {
         if(count($types) === 0){
@@ -30,6 +31,7 @@ class MimeTypeValidatorConfig implements ValidatorConfigInterface
         $this->types = new StringCollection($types);
         $this->_tNegated = $negated;
         $this->_tDumpable = $dumpable;
+        $this->_tDescription = $description;
     }
 
     public function getTypes(): StringCollection
@@ -61,7 +63,8 @@ class MimeTypeValidatorConfig implements ValidatorConfigInterface
             return new self(
                 $data['types'],
                 array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
-                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true
+                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true,
+                array_key_exists('description', $data) ? (string)$data['description'] : null,
             );
         }catch(\Exception $e){
             throw new ArrayFactoryException($e->getMessage());
@@ -76,7 +79,8 @@ class MimeTypeValidatorConfig implements ValidatorConfigInterface
         return [
             'types' => $this->types->toArray(),
             'negated' => $this->_tNegated,
-            'dumpable' => $this->_tDumpable
+            'dumpable' => $this->_tDumpable,
+            'description' => $this->_tDescription
         ];
     }
 }

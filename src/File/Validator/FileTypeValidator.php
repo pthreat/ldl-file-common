@@ -22,10 +22,11 @@ class FileTypeValidator implements ValidatorInterface
      * @param iterable $types
      * @param bool $negated
      * @param bool $dumpable
+     * @param string $description
      */
-    public function __construct(iterable $types, bool $negated=false, bool $dumpable=true)
+    public function __construct(iterable $types, bool $negated=false, bool $dumpable=true, string $description=null)
     {
-        $this->config = new Config\FileTypeValidatorConfig($types, $negated, $dumpable);
+        $this->config = new Config\FileTypeValidatorConfig($types, $negated, $dumpable, $description);
     }
 
     public function validate($path): void

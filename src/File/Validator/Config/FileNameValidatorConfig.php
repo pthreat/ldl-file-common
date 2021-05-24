@@ -19,12 +19,14 @@ class FileNameValidatorConfig implements ValidatorConfigInterface
     public function __construct(
         string $filename,
         bool $negated=false,
-        bool $dumpable=true
+        bool $dumpable=true,
+        string $description=null
     )
     {
         $this->filename = $filename;
         $this->_tNegated = $negated;
         $this->_tDumpable = $dumpable;
+        $this->_tDescription = $description;
     }
 
     /**
@@ -58,7 +60,8 @@ class FileNameValidatorConfig implements ValidatorConfigInterface
         return new self(
             $data['filename'],
             array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
-            array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true
+            array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true,
+            array_key_exists('description', $data) ? (string)$data['description'] : null
         );
     }
 
@@ -70,7 +73,8 @@ class FileNameValidatorConfig implements ValidatorConfigInterface
         return [
             'filename' => $this->filename,
             'negated' => $this->_tNegated,
-            'dumpable' => $this->_tDumpable
+            'dumpable' => $this->_tDumpable,
+            'description' => $this->_tDescription
         ];
     }
 }
