@@ -14,9 +14,9 @@ class DirectoryValidator implements ValidatorInterface
      */
     private $config;
 
-    public function __construct(bool $negated=false, bool $dumpable=true)
+    public function __construct(bool $negated=false, bool $dumpable=true, string $description=null)
     {
-        $this->config = new BasicValidatorConfig($negated, $dumpable);
+        $this->config = new BasicValidatorConfig($negated, $dumpable, $description);
     }
 
     /**
@@ -35,6 +35,10 @@ class DirectoryValidator implements ValidatorInterface
         $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
     }
 
+    /**
+     * @param $path
+     * @throws Exception\FileNotFoundException
+     */
     public function assertTrue($path): void
     {
         if(is_dir($path)){
@@ -45,6 +49,10 @@ class DirectoryValidator implements ValidatorInterface
         throw new Exception\FileNotFoundException($msg);
     }
 
+    /**
+     * @param $path
+     * @throws Exception\FileNotFoundException
+     */
     public function assertFalse($path): void
     {
         if(!is_dir($path)){
@@ -74,7 +82,7 @@ class DirectoryValidator implements ValidatorInterface
         /**
          * @var BasicValidatorConfig $config
          */
-        return new self($config->isNegated(), $config->isDumpable());
+        return new self($config->isNegated(), $config->isDumpable(), $config->getDescription());
     }
 
     /**

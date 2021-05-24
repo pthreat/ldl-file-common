@@ -28,8 +28,10 @@ $file = sprintf('%s%s%s.txt', $tmpDir, \DIRECTORY_SEPARATOR, 'test.json');
 
 file_put_contents($file, json_encode($json,\JSON_THROW_ON_ERROR));
 
-echo "Append JSON file to the collection ...\n";
+echo "Append JSON file to the collection (no exception must be thrown) ...\n";
 $jsonCollection->append($file);
+echo "OK!\n";
+
 try {
 
     echo "Append regular file to the collection, exception must be thrown\n";

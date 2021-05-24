@@ -17,10 +17,11 @@ class FileSizeValidator implements ValidatorInterface
         int $bytes,
         string $operator,
         bool $negated=false,
-        bool $dumpable=true
+        bool $dumpable=true,
+        string $description=null
     )
     {
-        $this->config = new Config\FileSizeValidatorConfig($bytes, $operator, $negated, $dumpable);
+        $this->config = new Config\FileSizeValidatorConfig($bytes, $operator, $negated, $dumpable, $description);
     }
 
     /**

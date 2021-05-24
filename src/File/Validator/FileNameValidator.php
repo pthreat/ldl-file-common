@@ -12,9 +12,9 @@ class FileNameValidator implements ValidatorInterface
      */
     private $config;
 
-    public function __construct(string $filename, bool $negated=false, bool $dumpable=true)
+    public function __construct(string $filename, bool $negated=false, bool $dumpable=true, string $description=null)
     {
-        $this->config = new Config\FileNameValidatorConfig($filename, $negated, $dumpable);
+        $this->config = new Config\FileNameValidatorConfig($filename, $negated, $dumpable, $description);
     }
 
     /**

@@ -31,7 +31,8 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface
         int $bytes,
         string $operator,
         bool $negated=false,
-        bool $dumpable=true
+        bool $dumpable=true,
+        string $description=null
     )
     {
         $operator = strtolower($operator);
@@ -59,6 +60,7 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface
         $this->bytes = $bytes;
         $this->_tNegated = $negated;
         $this->_tDumpable = $dumpable;
+        $this->_tDescription = $description;
     }
 
     /**
@@ -102,7 +104,9 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface
                 (int) $data['bytes'],
                 (string) $data['operator'],
                 array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
-                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true
+                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true,
+                array_key_exists('description', $data) ? (string)$data['description'] : null
+
             );
         }catch(\Exception $e){
             throw new ArrayFactoryException($e->getMessage());
@@ -118,7 +122,8 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface
             'bytes' => $this->bytes,
             'operator' => $this->operator,
             'negated' => $this->_tNegated,
-            'dumpable' => $this->_tDumpable
+            'dumpable' => $this->_tDumpable,
+            'description' => $this->_tDescription
         ];
     }
 }

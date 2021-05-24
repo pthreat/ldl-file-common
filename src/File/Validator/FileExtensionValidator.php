@@ -12,9 +12,14 @@ class FileExtensionValidator implements ValidatorInterface
      */
     private $config;
 
-    public function __construct(string $extension, bool $negated=false, bool $dumpable=true)
+    public function __construct(
+        string $extension,
+        bool $negated=false,
+        bool $dumpable=true,
+        string $description=null
+    )
     {
-        $this->config = new Config\FileExtensionValidatorConfig($extension, $negated, $dumpable);
+        $this->config = new Config\FileExtensionValidatorConfig($extension, $negated, $dumpable, $description);
     }
 
     /**
@@ -70,7 +75,8 @@ class FileExtensionValidator implements ValidatorInterface
         return new self(
             $config->getExtension(),
             $config->isNegated(),
-            $config->isDumpable()
+            $config->isDumpable(),
+            $config->getDescription()
         );
     }
 

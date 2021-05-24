@@ -28,15 +28,23 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
      * @param bool $storeLine
      * @param bool $negated
      * @param bool $dumpable
+     * @param string|null $description
      */
     public function __construct(
         string $regex,
         bool $storeLine = true,
         bool $negated=false,
-        bool $dumpable=true
+        bool $dumpable=true,
+        string $description=null
     )
     {
-        $this->config = new Config\HasRegexContentValidatorConfig($regex, $storeLine, $negated, $dumpable);
+        $this->config = new Config\HasRegexContentValidatorConfig(
+            $regex,
+            $storeLine,
+            $negated,
+            $dumpable,
+            $description
+        );
     }
 
     /**
@@ -45,22 +53,22 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
      */
     public function validate($path): void
     {
-        if(!is_readable($path)){
-            $msg = "File \"$path\" is not readable!\n";
+        $fp = @fopen($path, 'rb');
+
+        if(!$fp){
+            $msg = "Could not open file \"$path\" in rb mode!\n";
             throw new \RuntimeException($msg);
         }
 
-        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
+        $this->config->isNegated() ? $this->assertFalse($path, $fp) : $this->assertTrue($path, $fp);
     }
 
-    public function assertTrue($path): void
+    public function assertTrue($path, $fp=null): void
     {
         $lineNo = 0;
         $hasMatches = false;
 
-        $fp = @fopen($path, 'rb+');
-
-        while($line  = fgets($fp)){
+        while($line = fgets($fp)){
             $lineNo++;
 
             if(preg_match($this->config->getRegex(), $line)){
@@ -78,14 +86,12 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
         throw new \LogicException("File: \"$path\" does not match criteria");
     }
 
-    public function assertFalse($path): void
+    public function assertFalse($path, $fp=null): void
     {
         $lineNo = 0;
         $hasMatches = false;
 
-        $fp = @fopen($path, 'rb+');
-
-        while($line  = fgets($fp)){
+        while($line = fgets($fp)){
             $lineNo++;
 
             if(preg_match($this->config->getRegex(), $line)){
@@ -131,7 +137,8 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
             $config->getRegex(),
             $config->isStoreLine(),
             $config->isNegated(),
-            $config->isDumpable()
+            $config->isDumpable(),
+            $config->getDescription()
         );
     }
 

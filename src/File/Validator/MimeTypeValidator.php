@@ -12,9 +12,9 @@ class MimeTypeValidator implements ValidatorInterface
      */
     private $config;
 
-    public function __construct($types, bool $negated=false, bool $dumpable=true)
+    public function __construct($types, bool $negated=false, bool $dumpable=true, string $description=null)
     {
-        $this->config = new Config\MimeTypeValidatorConfig($types, $negated, $dumpable);
+        $this->config = new Config\MimeTypeValidatorConfig($types, $negated, $dumpable, $description);
     }
 
     /**
@@ -79,7 +79,12 @@ class MimeTypeValidator implements ValidatorInterface
         /**
          * @var Config\MimeTypeValidatorConfig $config
          */
-        return new self($config->getTypes(), $config->isStrict());
+        return new self(
+            $config->getTypes(),
+            $config->isNegated(),
+            $config->isDumpable(),
+            $config->getDescription()
+        );
     }
 
     /**
