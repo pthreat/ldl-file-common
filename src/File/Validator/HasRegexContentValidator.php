@@ -60,6 +60,8 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
             throw new \RuntimeException($msg);
         }
 
+        $this->lines = null;
+
         $this->config->isNegated() ? $this->assertFalse($path, $fp) : $this->assertTrue($path, $fp);
     }
 

@@ -13,5 +13,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- fix/1200410494797363 - Fix HasRegexContentValidator
 - fix/1200366404543319 - Fix validators and configs to comply with ldl-validators
 
