@@ -4,10 +4,14 @@ namespace LDL\File\Validator;
 
 use LDL\Validators\Config\BasicValidatorConfig;
 use LDL\Validators\Config\ValidatorConfigInterface;
+use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorInterface;
 
-class WritableFileValidator implements ValidatorInterface
+class WritableFileValidator implements ValidatorInterface, NegatedValidatorInterface
 {
+    use ValidatorValidateTrait {validate as _validate;}
+
     /**
      * @var BasicValidatorConfig
      */
@@ -18,22 +22,10 @@ class WritableFileValidator implements ValidatorInterface
         $this->config = new BasicValidatorConfig($negated, $dumpable, $description);
     }
 
-    /**
-     * @param mixed $path
-     * @throws \Exception
-     */
-    public function validate($path): void
-    {
-        if(!file_exists($path)){
-            $msg = "File \"$path\" does not exists";
-            throw new Exception\FileNotFoundException($msg);
-        }
-
-        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
-    }
-
     public function assertTrue($path): void
     {
+        $this->initialValidation($path);
+
         if(is_writable($path)){
             return;
         }
@@ -44,6 +36,8 @@ class WritableFileValidator implements ValidatorInterface
 
     public function assertFalse($path): void
     {
+        $this->initialValidation($path);
+
         if(!is_writable($path)){
             return;
         }
@@ -80,5 +74,19 @@ class WritableFileValidator implements ValidatorInterface
     public function getConfig(): BasicValidatorConfig
     {
         return $this->config;
+    }
+
+    /**
+     * @param $path
+     * @throws Exception\FileNotFoundException
+     */
+    private function initialValidation($path): void
+    {
+        if(file_exists($path)){
+            return;
+        }
+
+        $msg = "File \"$path\" does not exists";
+        throw new Exception\FileNotFoundException($msg);
     }
 }

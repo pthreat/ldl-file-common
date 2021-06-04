@@ -4,10 +4,14 @@ namespace LDL\File\Validator;
 
 use LDL\Validators\HasValidatorResultInterface;
 use LDL\Validators\Config\ValidatorConfigInterface;
+use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorInterface;
 
-class HasRegexContentValidator implements ValidatorInterface, HasValidatorResultInterface
+class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorInterface, HasValidatorResultInterface
 {
+    use ValidatorValidateTrait {validate as _validate;}
+
     /**
      * @var Config\HasRegexContentValidatorConfig
      */
@@ -47,26 +51,9 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
         );
     }
 
-    /**
-     * @param mixed $path
-     * @throws \Exception
-     */
-    public function validate($path): void
+    public function assertTrue($path): void
     {
-        $fp = @fopen($path, 'rb');
-
-        if(!$fp){
-            $msg = "Could not open file \"$path\" in rb mode!\n";
-            throw new \RuntimeException($msg);
-        }
-
-        $this->lines = null;
-
-        $this->config->isNegated() ? $this->assertFalse($path, $fp) : $this->assertTrue($path, $fp);
-    }
-
-    public function assertTrue($path, $fp=null): void
-    {
+        $fp = $this->initializeValidation($path);
         $lineNo = 0;
         $hasMatches = false;
 
@@ -88,8 +75,9 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
         throw new \LogicException("File: \"$path\" does not match criteria");
     }
 
-    public function assertFalse($path, $fp=null): void
+    public function assertFalse($path): void
     {
+        $fp = $this->initializeValidation($path);
         $lineNo = 0;
         $hasMatches = false;
 
@@ -150,5 +138,22 @@ class HasRegexContentValidator implements ValidatorInterface, HasValidatorResult
     public function getConfig(): Config\HasRegexContentValidatorConfig
     {
         return $this->config;
+    }
+
+    /**
+     * @param $path
+     * @return bool|resource
+     */
+    private function initializeValidation($path)
+    {
+        $fp = @fopen($path, 'rb');
+
+        if(!$fp){
+            $msg = "Could not open file \"$path\" in rb mode!\n";
+            throw new \RuntimeException($msg);
+        }
+
+        $this->lines = null;
+        return $fp;
     }
 }
