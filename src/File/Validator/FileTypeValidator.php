@@ -3,10 +3,13 @@
 namespace LDL\File\Validator;
 
 use LDL\Validators\Config\ValidatorConfigInterface;
+use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorInterface;
 
-class FileTypeValidator implements ValidatorInterface
+class FileTypeValidator implements ValidatorInterface, NegatedValidatorInterface
 {
+    use ValidatorValidateTrait;
 
     /**
      * @var Config\FileTypeValidatorConfig
@@ -29,55 +32,22 @@ class FileTypeValidator implements ValidatorInterface
         $this->config = new Config\FileTypeValidatorConfig($types, $negated, $dumpable, $description);
     }
 
-    public function validate($path): void
+    public function assertTrue($path): void
     {
-        $perms = fileperms($path);
+        $type = $this->initialValidation($path);
 
-        if(!$perms){
-            throw new \InvalidArgumentException('Invalid file provided');
-        }
-
-        switch ($perms & 0xF000) {
-            case 0xC000: // socket
-                $type = Config\FileTypeValidatorConfig::FILE_TYPE_SOCKET;
-                break;
-            case 0xA000: // symbolic link
-                $type = Config\FileTypeValidatorConfig::FILE_TYPE_LINK;
-                break;
-            case 0x8000: // regular
-                $type = Config\FileTypeValidatorConfig::FILE_TYPE_REGULAR;
-                break;
-            case 0x6000: // block special
-                $type = Config\FileTypeValidatorConfig::FILE_TYPE_BLOCK;
-                break;
-            case 0x4000: // directory
-                $type = Config\FileTypeValidatorConfig::FILE_TYPE_DIRECTORY;
-                break;
-            case 0x2000: // character special
-                $type = Config\FileTypeValidatorConfig::FILE_TYPE_CHAR;
-                break;
-            case 0x1000: // FIFO pipe
-                $type = Config\FileTypeValidatorConfig::FILE_TYPE_FIFO;
-                break;
-            default: // unknown
-                $type = Config\FileTypeValidatorConfig::FILE_TYPE_UNKNOWN;
-        }
-
-        $this->config->isNegated() ? $this->assertFalse($type) : $this->assertTrue($type);
-    }
-
-    public function assertTrue($value): void
-    {
-        if($this->config->getTypes()->hasValue($value)){
+        if($this->config->getTypes()->hasValue($type)){
             return;
         }
 
         throw new \InvalidArgumentException('File type criteria not satisfied');
     }
 
-    public function assertFalse($value): void
+    public function assertFalse($path): void
     {
-        if(!$this->config->getTypes()->hasValue($value)){
+        $type = $this->initialValidation($path);
+
+        if(!$this->config->getTypes()->hasValue($type)){
             return;
         }
 
@@ -116,5 +86,42 @@ class FileTypeValidator implements ValidatorInterface
     public function getConfig(): Config\FileTypeValidatorConfig
     {
         return $this->config;
+    }
+
+    private function initialValidation($path): string
+    {
+        $perms = fileperms($path);
+
+        if(!$perms){
+            throw new \InvalidArgumentException('Invalid file provided');
+        }
+
+        switch ($perms & 0xF000) {
+            case 0xC000: // socket
+                $type = Config\FileTypeValidatorConfig::FILE_TYPE_SOCKET;
+                break;
+            case 0xA000: // symbolic link
+                $type = Config\FileTypeValidatorConfig::FILE_TYPE_LINK;
+                break;
+            case 0x8000: // regular
+                $type = Config\FileTypeValidatorConfig::FILE_TYPE_REGULAR;
+                break;
+            case 0x6000: // block special
+                $type = Config\FileTypeValidatorConfig::FILE_TYPE_BLOCK;
+                break;
+            case 0x4000: // directory
+                $type = Config\FileTypeValidatorConfig::FILE_TYPE_DIRECTORY;
+                break;
+            case 0x2000: // character special
+                $type = Config\FileTypeValidatorConfig::FILE_TYPE_CHAR;
+                break;
+            case 0x1000: // FIFO pipe
+                $type = Config\FileTypeValidatorConfig::FILE_TYPE_FIFO;
+                break;
+            default: // unknown
+                $type = Config\FileTypeValidatorConfig::FILE_TYPE_UNKNOWN;
+        }
+
+        return $type;
     }
 }

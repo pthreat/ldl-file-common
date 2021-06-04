@@ -5,12 +5,15 @@ namespace LDL\File\Validator\Config;
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
 use LDL\Type\Collection\Types\String\StringCollection;
+use LDL\Validators\Config\NegatedValidatorConfigInterface;
+use LDL\Validators\Config\Traits\NegatedValidatorConfigTrait;
 use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
 
-class MimeTypeValidatorConfig implements ValidatorConfigInterface
+class MimeTypeValidatorConfig implements ValidatorConfigInterface, NegatedValidatorConfigInterface
 {
     use ValidatorConfigTrait;
+    use NegatedValidatorConfigTrait;
 
     /**
      * @var StringCollection

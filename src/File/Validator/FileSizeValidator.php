@@ -2,12 +2,15 @@
 
 namespace LDL\File\Validator;
 
-use LDL\Framework\Base\Collection\Contracts\CollectionInterface;
 use LDL\Validators\Config\ValidatorConfigInterface;
+use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorInterface;
 
-class FileSizeValidator implements ValidatorInterface
+class FileSizeValidator implements ValidatorInterface, NegatedValidatorInterface
 {
+    use ValidatorValidateTrait;
+
     /**
      * @var Config\FileSizeValidatorConfig
      */
@@ -22,15 +25,6 @@ class FileSizeValidator implements ValidatorInterface
     )
     {
         $this->config = new Config\FileSizeValidatorConfig($bytes, $operator, $negated, $dumpable, $description);
-    }
-
-    /**
-     * @param mixed $path
-     * @throws \Exception
-     */
-    public function validate($path): void
-    {
-        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
     }
 
     public function assertTrue($path): void

@@ -5,12 +5,15 @@ namespace LDL\File\Validator\Config;
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
 use LDL\Type\Collection\Types\String\UniqueStringCollection;
+use LDL\Validators\Config\NegatedValidatorConfigInterface;
+use LDL\Validators\Config\Traits\NegatedValidatorConfigTrait;
 use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
 
-class FileTypeValidatorConfig implements ValidatorConfigInterface
+class FileTypeValidatorConfig implements ValidatorConfigInterface, NegatedValidatorConfigInterface
 {
     use ValidatorConfigTrait;
+    use NegatedValidatorConfigTrait;
 
     public const FILE_TYPE_REGULAR='regular';
     public const FILE_TYPE_DIRECTORY='directory';

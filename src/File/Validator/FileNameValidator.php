@@ -3,10 +3,14 @@
 namespace LDL\File\Validator;
 
 use LDL\Validators\Config\ValidatorConfigInterface;
+use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorInterface;
 
-class FileNameValidator implements ValidatorInterface
+class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface
 {
+    use ValidatorValidateTrait;
+
     /**
      * @var Config\FileNameValidatorConfig
      */
@@ -15,15 +19,6 @@ class FileNameValidator implements ValidatorInterface
     public function __construct(string $filename, bool $negated=false, bool $dumpable=true, string $description=null)
     {
         $this->config = new Config\FileNameValidatorConfig($filename, $negated, $dumpable, $description);
-    }
-
-    /**
-     * @param mixed $path
-     * @throws \Exception
-     */
-    public function validate($path): void
-    {
-        $this->config->isNegated() ? $this->assertFalse($path) : $this->assertTrue($path);
     }
 
     public function assertTrue($path): void
