@@ -5,10 +5,11 @@ namespace LDL\File\Validator;
 use LDL\Validators\HasValidatorResultInterface;
 use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\ResetValidatorInterface;
 use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorInterface;
 
-class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorInterface, HasValidatorResultInterface
+class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorInterface, HasValidatorResultInterface, ResetValidatorInterface
 {
     use ValidatorValidateTrait {validate as _validate;}
 
@@ -49,6 +50,11 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
             $dumpable,
             $description
         );
+    }
+
+    public function reset()
+    {
+        $this->lines = null;
     }
 
     public function assertTrue($path): void
@@ -153,7 +159,6 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
             throw new \RuntimeException($msg);
         }
 
-        $this->lines = null;
         return $fp;
     }
 }
