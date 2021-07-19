@@ -4,15 +4,12 @@ namespace LDL\File\Validator\Config;
 
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
-use LDL\Validators\Config\NegatedValidatorConfigInterface;
-use LDL\Validators\Config\Traits\NegatedValidatorConfigTrait;
 use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
 
-class FileSizeValidatorConfig implements ValidatorConfigInterface, NegatedValidatorConfigInterface
+class FileSizeValidatorConfig implements ValidatorConfigInterface
 {
     use ValidatorConfigTrait;
-    use NegatedValidatorConfigTrait;
 
     public const OPERATOR_EQ='eq';
     public const OPERATOR_GT='gt';
@@ -32,10 +29,7 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface, NegatedValida
 
     public function __construct(
         int $bytes,
-        string $operator,
-        bool $negated=false,
-        bool $dumpable=true,
-        string $description=null
+        string $operator
     )
     {
         $operator = strtolower($operator);
@@ -61,9 +55,6 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface, NegatedValida
 
         $this->operator = $operator;
         $this->bytes = $bytes;
-        $this->_tNegated = $negated;
-        $this->_tDumpable = $dumpable;
-        $this->_tDescription = $description;
     }
 
     /**
@@ -83,14 +74,6 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface, NegatedValida
     }
 
     /**
-     * @return array
-     */
-    public function jsonSerialize() : array
-    {
-        return $this->toArray();
-    }
-
-    /**
      * @param array $data
      * @return ArrayFactoryInterface
      * @throws ArrayFactoryException
@@ -105,10 +88,7 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface, NegatedValida
         try{
             return new self(
                 (int) $data['bytes'],
-                (string) $data['operator'],
-                array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
-                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true,
-                array_key_exists('description', $data) ? (string)$data['description'] : null
+                (string) $data['operator']
 
             );
         }catch(\Exception $e){
@@ -123,10 +103,7 @@ class FileSizeValidatorConfig implements ValidatorConfigInterface, NegatedValida
     {
         return [
             'bytes' => $this->bytes,
-            'operator' => $this->operator,
-            'negated' => $this->_tNegated,
-            'dumpable' => $this->_tDumpable,
-            'description' => $this->_tDescription
+            'operator' => $this->operator
         ];
     }
 }

@@ -4,15 +4,12 @@ namespace LDL\File\Validator\Config;
 
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
-use LDL\Validators\Config\NegatedValidatorConfigInterface;
-use LDL\Validators\Config\Traits\NegatedValidatorConfigTrait;
 use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
 
-class FileExtensionValidatorConfig implements ValidatorConfigInterface, NegatedValidatorConfigInterface
+class FileExtensionValidatorConfig implements ValidatorConfigInterface
 {
     use ValidatorConfigTrait;
-    use NegatedValidatorConfigTrait;
 
     /**
      * @var string
@@ -20,16 +17,10 @@ class FileExtensionValidatorConfig implements ValidatorConfigInterface, NegatedV
     private $extension;
 
     public function __construct(
-        string $extension,
-        bool $negated=false,
-        bool $dumpable=true,
-        string $description=null
+        string $extension
     )
     {
         $this->extension = $extension;
-        $this->_tNegated = $negated;
-        $this->_tDumpable = $dumpable;
-        $this->_tDescription = $description;
     }
 
     /**
@@ -38,14 +29,6 @@ class FileExtensionValidatorConfig implements ValidatorConfigInterface, NegatedV
     public function getExtension(): string
     {
         return $this->extension;
-    }
-
-    /**
-     * @return array
-     */
-    public function jsonSerialize() : array
-    {
-        return $this->toArray();
     }
 
     /**
@@ -61,10 +44,7 @@ class FileExtensionValidatorConfig implements ValidatorConfigInterface, NegatedV
         }
 
         return new self(
-            $data['extension'],
-            array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
-            array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true,
-            array_key_exists('description', $data) ? (string)$data['description'] : null
+            $data['extension']
         );
     }
 
@@ -74,10 +54,7 @@ class FileExtensionValidatorConfig implements ValidatorConfigInterface, NegatedV
     public function toArray(): array
     {
         return [
-            'extension' => $this->extension,
-            'negated' => $this->_tNegated,
-            'dumpable' => $this->_tDumpable,
-            'description' => $this->_tDescription
+            'extension' => $this->extension
         ];
     }
 }

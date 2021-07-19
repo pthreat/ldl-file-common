@@ -5,15 +5,12 @@ namespace LDL\File\Validator\Config;
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
 use LDL\Framework\Helper\RegexHelper;
-use LDL\Validators\Config\NegatedValidatorConfigInterface;
-use LDL\Validators\Config\Traits\NegatedValidatorConfigTrait;
 use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
 
-class HasRegexContentValidatorConfig implements ValidatorConfigInterface, NegatedValidatorConfigInterface
+class HasRegexContentValidatorConfig implements ValidatorConfigInterface
 {
     use ValidatorConfigTrait;
-    use NegatedValidatorConfigTrait;
 
     /**
      * @var string
@@ -27,19 +24,13 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface, Negate
 
     public function __construct(
         string $regex,
-        bool $storeLine = true,
-        bool $negated=false,
-        bool $dumpable=true,
-        string $description=null
+        bool $storeLine = true
     )
     {
         RegexHelper::validate($regex);
 
         $this->regex = $regex;
         $this->storeLine = $storeLine;
-        $this->_tNegated = $negated;
-        $this->_tDumpable = $dumpable;
-        $this->_tDescription = $description;
     }
 
     /**
@@ -59,14 +50,6 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface, Negate
     }
 
     /**
-     * @return array
-     */
-    public function jsonSerialize() : array
-    {
-        return $this->toArray();
-    }
-
-    /**
      * @param array $data
      * @return ArrayFactoryInterface
      * @throws ArrayFactoryException
@@ -83,10 +66,7 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface, Negate
         try{
             return new self(
                 (string) $data['regex'],
-                $storeLine,
-                array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
-                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true,
-                array_key_exists('description', $data) ? (string)$data['description'] : null
+                $storeLine
             );
         }catch(\Exception $e){
             throw new ArrayFactoryException($e->getMessage());
@@ -100,10 +80,7 @@ class HasRegexContentValidatorConfig implements ValidatorConfigInterface, Negate
     {
         return [
             'regex' => $this->regex,
-            'storeLine' => $this->storeLine,
-            'negated' => $this->_tNegated,
-            'dumpable' => $this->_tDumpable,
-            'description' => $this->_tDescription
+            'storeLine' => $this->storeLine
         ];
     }
 }

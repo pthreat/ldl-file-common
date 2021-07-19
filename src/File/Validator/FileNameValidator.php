@@ -4,28 +4,54 @@ namespace LDL\File\Validator;
 
 use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\Traits\NegatedValidatorTrait;
+use LDL\Validators\Traits\ValidatorHasConfigInterfaceTrait;
 use LDL\Validators\Traits\ValidatorValidateTrait;
+use LDL\Validators\ValidatorHasConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface
+class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface, ValidatorHasConfigInterface
 {
     use ValidatorValidateTrait;
+    use ValidatorHasConfigInterfaceTrait;
+    use NegatedValidatorTrait;
 
     /**
-     * @var Config\FileNameValidatorConfig
+     * @var string|null
      */
-    private $config;
+    private $description;
 
-    public function __construct(string $filename, bool $negated=false, bool $dumpable=true, string $description=null)
+    public function __construct(
+        string $filename,
+        bool $negated=false,
+        string $description=null
+    )
     {
-        $this->config = new Config\FileNameValidatorConfig($filename, $negated, $dumpable, $description);
+        $this->_tConfig = new Config\FileNameValidatorConfig($filename);
+        $this->_tNegated = $negated;
+        $this->description = $description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        if(!$this->description){
+            return sprintf(
+                'File name must match with: %s',
+                $this->_tConfig->getFilename()
+            );
+        }
+
+        return $this->description;
     }
 
     public function assertTrue($path): void
     {
         $file = new \SplFileInfo($path);
 
-        if($file->getFilename() === $this->config->getFilename()){
+        if($file->getFilename() === $this->_tConfig->getFilename()){
             return;
         }
 
@@ -36,7 +62,7 @@ class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface
     {
         $file = new \SplFileInfo($path);
 
-        if($file->getFilename() !== $this->config->getFilename()){
+        if($file->getFilename() !== $this->_tConfig->getFilename()){
             return;
         }
 
@@ -45,10 +71,12 @@ class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface
 
     /**
      * @param ValidatorConfigInterface $config
+     * @param bool $negated
+     * @param string|null $description
      * @return ValidatorInterface
      * @throws \InvalidArgumentException
      */
-    public static function fromConfig(ValidatorConfigInterface $config): ValidatorInterface
+    public static function fromConfig(ValidatorConfigInterface $config, bool $negated = false, string $description=null): ValidatorInterface
     {
         if(false === $config instanceof Config\FileNameValidatorConfig){
             $msg = sprintf(
@@ -64,16 +92,8 @@ class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface
          */
         return new self(
             $config->getFilename(),
-            $config->isNegated(),
-            $config->isDumpable()
+            $negated,
+            $description
         );
-    }
-
-    /**
-     * @return Config\FileNameValidatorConfig
-     */
-    public function getConfig(): Config\FileNameValidatorConfig
-    {
-        return $this->config;
     }
 }

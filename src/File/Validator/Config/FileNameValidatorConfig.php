@@ -4,15 +4,12 @@ namespace LDL\File\Validator\Config;
 
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
-use LDL\Validators\Config\NegatedValidatorConfigInterface;
-use LDL\Validators\Config\Traits\NegatedValidatorConfigTrait;
 use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
 
-class FileNameValidatorConfig implements ValidatorConfigInterface, NegatedValidatorConfigInterface
+class FileNameValidatorConfig implements ValidatorConfigInterface
 {
     use ValidatorConfigTrait;
-    use NegatedValidatorConfigTrait;
 
     /**
      * @var string
@@ -20,16 +17,10 @@ class FileNameValidatorConfig implements ValidatorConfigInterface, NegatedValida
     private $filename;
 
     public function __construct(
-        string $filename,
-        bool $negated=false,
-        bool $dumpable=true,
-        string $description=null
+        string $filename
     )
     {
         $this->filename = $filename;
-        $this->_tNegated = $negated;
-        $this->_tDumpable = $dumpable;
-        $this->_tDescription = $description;
     }
 
     /**
@@ -38,14 +29,6 @@ class FileNameValidatorConfig implements ValidatorConfigInterface, NegatedValida
     public function getFilename(): string
     {
         return $this->filename;
-    }
-
-    /**
-     * @return array
-     */
-    public function jsonSerialize() : array
-    {
-        return $this->toArray();
     }
 
     /**
@@ -61,10 +44,7 @@ class FileNameValidatorConfig implements ValidatorConfigInterface, NegatedValida
         }
 
         return new self(
-            $data['filename'],
-            array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
-            array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true,
-            array_key_exists('description', $data) ? (string)$data['description'] : null
+            $data['filename']
         );
     }
 
@@ -74,10 +54,7 @@ class FileNameValidatorConfig implements ValidatorConfigInterface, NegatedValida
     public function toArray(): array
     {
         return [
-            'filename' => $this->filename,
-            'negated' => $this->_tNegated,
-            'dumpable' => $this->_tDumpable,
-            'description' => $this->_tDescription
+            'filename' => $this->filename
         ];
     }
 }

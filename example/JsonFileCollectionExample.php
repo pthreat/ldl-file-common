@@ -2,6 +2,8 @@
 
 use LDL\File\Collection\JsonFileCollection;
 use LDL\File\Validator\Exception\JsonFileDecodeException;
+use LDL\Validators\Chain\Dumper\ValidatorChainExprDumper;
+use LDL\Validators\Chain\Dumper\ValidatorChainHumanDumper;
 
 require __DIR__.'/../vendor/autoload.php';
 
@@ -18,6 +20,11 @@ echo sprintf(
 );
 
 $jsonCollection = new JsonFileCollection();
+
+echo "Check validators\n";
+
+dump(ValidatorChainExprDumper::dump($jsonCollection->getAppendValueValidatorChain()));
+dump(ValidatorChainHumanDumper::dump($jsonCollection->getAppendValueValidatorChain()));
 
 $json = [
     'name' => 'name',
