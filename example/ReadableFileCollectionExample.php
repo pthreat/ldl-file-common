@@ -2,6 +2,8 @@
 
 use LDL\File\Collection\ReadableFileCollection;
 use LDL\File\Validator\Exception\ReadableFileValidatorException;
+use LDL\Validators\Chain\Dumper\ValidatorChainExprDumper;
+use LDL\Validators\Chain\Dumper\ValidatorChainHumanDumper;
 
 require __DIR__.'/../vendor/autoload.php';
 
@@ -28,6 +30,10 @@ echo sprintf(
 );
 
 $rfc = new ReadableFileCollection();
+
+echo "Check validators\n";
+dump(ValidatorChainExprDumper::dump($rfc->getAppendValueValidatorChain()));
+dump(ValidatorChainHumanDumper::dump($rfc->getAppendValueValidatorChain()));
 
 $permissions = [
     0444, //Readable

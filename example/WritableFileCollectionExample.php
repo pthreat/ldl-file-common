@@ -2,6 +2,8 @@
 
 use LDL\File\Collection\WritableFileCollection;
 use LDL\File\Validator\Exception\WritableFileValidatorException;
+use LDL\Validators\Chain\Dumper\ValidatorChainExprDumper;
+use LDL\Validators\Chain\Dumper\ValidatorChainHumanDumper;
 
 require __DIR__.'/../vendor/autoload.php';
 
@@ -12,6 +14,10 @@ echo sprintf(
 );
 
 $wfc = new WritableFileCollection();
+
+echo "Check validators\n";
+dump(ValidatorChainExprDumper::dump($wfc->getAppendValueValidatorChain()));
+dump(ValidatorChainHumanDumper::dump($wfc->getAppendValueValidatorChain()));
 
 $tmpDir = sprintf('%s%s%s',sys_get_temp_dir(), \DIRECTORY_SEPARATOR, 'ldl_fs_example');
 

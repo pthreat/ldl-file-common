@@ -4,39 +4,50 @@ namespace LDL\File\Validator;
 
 use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\Traits\NegatedValidatorTrait;
+use LDL\Validators\Traits\ValidatorHasConfigInterfaceTrait;
 use LDL\Validators\Traits\ValidatorValidateTrait;
+use LDL\Validators\ValidatorHasConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class FileTypeValidator implements ValidatorInterface, NegatedValidatorInterface
+class FileTypeValidator implements ValidatorInterface, NegatedValidatorInterface, ValidatorHasConfigInterface
 {
     use ValidatorValidateTrait;
+    use ValidatorHasConfigInterfaceTrait;
+    use NegatedValidatorTrait;
 
     /**
-     * @var Config\FileTypeValidatorConfig
+     * @var string|null
      */
-    private $config;
+    private $description;
 
-    /**
-     *
-     * The negated parameter specified if the regex should be matched or not, this is useful when you want to find
-     * files which DO HAVE a certain string. If you set negated to true, then only files which NOT comply to the
-     * regex will be shown.
-     *
-     * @param iterable $types
-     * @param bool $negated
-     * @param bool $dumpable
-     * @param string $description
-     */
-    public function __construct(iterable $types, bool $negated=false, bool $dumpable=true, string $description=null)
+    public function __construct(iterable $types, bool $negated=false, string $description=null)
     {
-        $this->config = new Config\FileTypeValidatorConfig($types, $negated, $dumpable, $description);
+        $this->_tConfig = new Config\FileTypeValidatorConfig($types);
+        $this->_tNegated = $negated;
+        $this->description = $description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        if(!$this->description){
+            return sprintf(
+                'File type must be one of: %s',
+                implode(",", $this->_tConfig->getTypes()->toArray())
+            );
+        }
+
+        return $this->description;
     }
 
     public function assertTrue($path): void
     {
         $type = $this->initialValidation($path);
 
-        if($this->config->getTypes()->hasValue($type)){
+        if($this->_tConfig->getTypes()->hasValue($type)){
             return;
         }
 
@@ -47,7 +58,7 @@ class FileTypeValidator implements ValidatorInterface, NegatedValidatorInterface
     {
         $type = $this->initialValidation($path);
 
-        if(!$this->config->getTypes()->hasValue($type)){
+        if(!$this->_tConfig->getTypes()->hasValue($type)){
             return;
         }
 
@@ -56,10 +67,12 @@ class FileTypeValidator implements ValidatorInterface, NegatedValidatorInterface
 
     /**
      * @param ValidatorConfigInterface $config
+     * @param bool $negated
+     * @param string|null $description
      * @return ValidatorInterface
      * @throws \InvalidArgumentException
      */
-    public static function fromConfig(ValidatorConfigInterface $config): ValidatorInterface
+    public static function fromConfig(ValidatorConfigInterface $config, bool $negated = false, string $description=null): ValidatorInterface
     {
         if(false === $config instanceof Config\FileTypeValidatorConfig){
             $msg = sprintf(
@@ -75,17 +88,9 @@ class FileTypeValidator implements ValidatorInterface, NegatedValidatorInterface
          */
         return new self(
             $config->getTypes(),
-            $config->isNegated(),
-            $config->isDumpable()
+            $negated,
+            $description
         );
-    }
-
-    /**
-     * @return Config\FileTypeValidatorConfig
-     */
-    public function getConfig(): Config\FileTypeValidatorConfig
-    {
-        return $this->config;
     }
 
     private function initialValidation($path): string

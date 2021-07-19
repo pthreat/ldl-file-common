@@ -5,15 +5,12 @@ namespace LDL\File\Validator\Config;
 use LDL\Framework\Base\Contracts\ArrayFactoryInterface;
 use LDL\Framework\Base\Exception\ArrayFactoryException;
 use LDL\Type\Collection\Types\String\UniqueStringCollection;
-use LDL\Validators\Config\NegatedValidatorConfigInterface;
-use LDL\Validators\Config\Traits\NegatedValidatorConfigTrait;
 use LDL\Validators\Config\Traits\ValidatorConfigTrait;
 use LDL\Validators\Config\ValidatorConfigInterface;
 
-class FileTypeValidatorConfig implements ValidatorConfigInterface, NegatedValidatorConfigInterface
+class FileTypeValidatorConfig implements ValidatorConfigInterface
 {
     use ValidatorConfigTrait;
-    use NegatedValidatorConfigTrait;
 
     public const FILE_TYPE_REGULAR='regular';
     public const FILE_TYPE_DIRECTORY='directory';
@@ -30,10 +27,7 @@ class FileTypeValidatorConfig implements ValidatorConfigInterface, NegatedValida
     private $types;
 
     public function __construct(
-        iterable $types,
-        bool $negated=false,
-        bool $dumpable=true,
-        string $description=null
+        iterable $types
     )
     {
         $validTypes = new UniqueStringCollection([
@@ -71,9 +65,6 @@ class FileTypeValidatorConfig implements ValidatorConfigInterface, NegatedValida
         });
 
         $this->types = $types;
-        $this->_tNegated = $negated;
-        $this->_tDumpable = $dumpable;
-        $this->_tDescription = $description;
     }
 
     /**
@@ -82,14 +73,6 @@ class FileTypeValidatorConfig implements ValidatorConfigInterface, NegatedValida
     public function getTypes(): UniqueStringCollection
     {
         return $this->types;
-    }
-
-    /**
-     * @return array
-     */
-    public function jsonSerialize() : array
-    {
-        return $this->toArray();
     }
 
     /**
@@ -111,10 +94,7 @@ class FileTypeValidatorConfig implements ValidatorConfigInterface, NegatedValida
 
         try{
             return new self(
-                $data['types'],
-                array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
-                array_key_exists('dumpable', $data) ? (bool)$data['dumpable'] : true,
-                array_key_exists('description', $data) ? (string)$data['description'] : null
+                $data['types']
 
             );
         }catch(\Exception $e){
@@ -128,10 +108,7 @@ class FileTypeValidatorConfig implements ValidatorConfigInterface, NegatedValida
     public function toArray(): array
     {
         return [
-            'types' => $this->types->toArray(),
-            'negated' => $this->_tNegated,
-            'dumpable' => $this->_tDumpable,
-            'description' => $this->_tDescription
+            'types' => $this->types->toArray()
         ];
     }
 }

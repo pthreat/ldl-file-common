@@ -2,24 +2,24 @@
 
 namespace LDL\File\Validator;
 
-use LDL\Validators\Config\BasicValidatorConfig;
-use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\Traits\NegatedValidatorTrait;
+use LDL\Validators\Traits\ValidatorDescriptionTrait;
 use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorInterface;
 
 class ReadableFileValidator implements ValidatorInterface, NegatedValidatorInterface
 {
     use ValidatorValidateTrait;
+    use NegatedValidatorTrait;
+    use ValidatorDescriptionTrait;
 
-    /**
-     * @var BasicValidatorConfig
-     */
-    private $config;
+    private const DESCRIPTION = 'Validate that a file is readable';
 
-    public function __construct(bool $negated=false, bool $dumpable=true, string $description=null)
+    public function __construct(bool $negated=false, string $description=null)
     {
-        $this->config = new BasicValidatorConfig($negated, $dumpable, $description);
+        $this->_tNegated = $negated;
+        $this->_tDescription = $description ?? self::DESCRIPTION;
     }
 
     public function assertTrue($path): void
@@ -40,35 +40,5 @@ class ReadableFileValidator implements ValidatorInterface, NegatedValidatorInter
 
         $msg = "File \"$path\" is readable!\n";
         throw new Exception\ReadableFileValidatorException($msg);
-    }
-
-    /**
-     * @param ValidatorConfigInterface $config
-     * @return ValidatorInterface
-     * @throws \InvalidArgumentException
-     */
-    public static function fromConfig(ValidatorConfigInterface $config): ValidatorInterface
-    {
-        if(false === $config instanceof BasicValidatorConfig){
-            $msg = sprintf(
-                'Config expected to be %s, config of class %s was given',
-                __CLASS__,
-                get_class($config)
-            );
-            throw new \InvalidArgumentException($msg);
-        }
-
-        /**
-         * @var BasicValidatorConfig $config
-         */
-        return new self($config->isNegated(), $config->isDumpable(), $config->getDescription());
-    }
-
-    /**
-     * @return BasicValidatorConfig
-     */
-    public function getConfig(): BasicValidatorConfig
-    {
-        return $this->config;
     }
 }

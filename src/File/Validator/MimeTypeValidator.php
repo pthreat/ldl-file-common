@@ -4,28 +4,32 @@ namespace LDL\File\Validator;
 
 use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\Traits\NegatedValidatorTrait;
+use LDL\Validators\Traits\ValidatorDescriptionTrait;
+use LDL\Validators\Traits\ValidatorHasConfigInterfaceTrait;
 use LDL\Validators\Traits\ValidatorValidateTrait;
+use LDL\Validators\ValidatorHasConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class MimeTypeValidator implements ValidatorInterface, NegatedValidatorInterface
+class MimeTypeValidator implements ValidatorInterface, NegatedValidatorInterface, ValidatorHasConfigInterface
 {
     use ValidatorValidateTrait;
+    use ValidatorHasConfigInterfaceTrait;
+    use NegatedValidatorTrait;
+    use ValidatorDescriptionTrait;
 
-    /**
-     * @var Config\MimeTypeValidatorConfig
-     */
-    private $config;
-
-    public function __construct($types, bool $negated=false, bool $dumpable=true, string $description=null)
+    public function __construct($types, bool $negated=false, string $description=null)
     {
-        $this->config = new Config\MimeTypeValidatorConfig($types, $negated, $dumpable, $description);
+        $this->_tConfig = new Config\MimeTypeValidatorConfig($types);
+        $this->_tNegated = $negated;
+        $this->_tDescription = $description ?? self::DESCRIPTION;
     }
 
     public function assertTrue($path): void
     {
         $mimeType = mime_content_type($path);
 
-        if($this->config->getTypes()->hasValue($mimeType)){
+        if($this->_tConfig->getTypes()->hasValue($mimeType)){
             return;
         }
 
@@ -33,7 +37,7 @@ class MimeTypeValidator implements ValidatorInterface, NegatedValidatorInterface
             sprintf(
                 '"%s" does not match given mime types: %s',
                 $path,
-                $this->config->getTypes()->implode(', ')
+                $this->_tConfig->getTypes()->implode(', ')
             )
         );
     }
@@ -42,14 +46,14 @@ class MimeTypeValidator implements ValidatorInterface, NegatedValidatorInterface
     {
         $mimeType = mime_content_type($path);
 
-        if(!$this->config->getTypes()->hasValue($mimeType)){
+        if(!$this->_tConfig->getTypes()->hasValue($mimeType)){
             return;
         }
 
         $msg = sprintf(
             '"%s" matches mime types: "%s"',
             $path,
-            $this->config->gettypes()->implode(', ')
+            $this->_tConfig->gettypes()->implode(', ')
         );
 
         throw new \LogicException($msg);
@@ -57,10 +61,12 @@ class MimeTypeValidator implements ValidatorInterface, NegatedValidatorInterface
 
     /**
      * @param ValidatorConfigInterface $config
+     * @param bool $negated
+     * @param string|null $description
      * @return ValidatorInterface
      * @throws \InvalidArgumentException
      */
-    public static function fromConfig(ValidatorConfigInterface $config): ValidatorInterface
+    public static function fromConfig(ValidatorConfigInterface $config, bool $negated = false, string $description=null): ValidatorInterface
     {
         if(false === $config instanceof Config\MimeTypeValidatorConfig){
             $msg = sprintf(
@@ -76,17 +82,8 @@ class MimeTypeValidator implements ValidatorInterface, NegatedValidatorInterface
          */
         return new self(
             $config->getTypes(),
-            $config->isNegated(),
-            $config->isDumpable(),
-            $config->getDescription()
+            $negated,
+            $description
         );
-    }
-
-    /**
-     * @return Config\MimeTypeValidatorConfig
-     */
-    public function getConfig(): Config\MimeTypeValidatorConfig
-    {
-        return $this->config;
     }
 }

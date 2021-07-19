@@ -4,53 +4,75 @@ namespace LDL\File\Validator;
 
 use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\NegatedValidatorInterface;
+use LDL\Validators\Traits\NegatedValidatorTrait;
+use LDL\Validators\Traits\ValidatorHasConfigInterfaceTrait;
 use LDL\Validators\Traits\ValidatorValidateTrait;
+use LDL\Validators\ValidatorHasConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class FileSizeValidator implements ValidatorInterface, NegatedValidatorInterface
+class FileSizeValidator implements ValidatorInterface, NegatedValidatorInterface, ValidatorHasConfigInterface
 {
     use ValidatorValidateTrait;
+    use ValidatorHasConfigInterfaceTrait;
+    use NegatedValidatorTrait;
 
     /**
-     * @var Config\FileSizeValidatorConfig
+     * @var string|null
      */
-    private $config;
+    private $description;
 
     public function __construct(
         int $bytes,
         string $operator,
         bool $negated=false,
-        bool $dumpable=true,
         string $description=null
     )
     {
-        $this->config = new Config\FileSizeValidatorConfig($bytes, $operator, $negated, $dumpable, $description);
+        $this->_tConfig = new Config\FileSizeValidatorConfig($bytes, $operator);
+        $this->_tNegated = $negated;
+        $this->description = $description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        if(!$this->description){
+            return sprintf(
+                'File size must be %s than %s bytes',
+                $this->_tConfig->getOperator(),
+                $this->_tConfig->getBytes()
+            );
+        }
+
+        return $this->description;
     }
 
     public function assertTrue($path): void
     {
         $size = filesize($path);
 
-        switch($this->config->getOperator()){
+        switch($this->_tConfig->getOperator()){
 
             case Config\FileSizeValidatorConfig::OPERATOR_EQ:
-                if($size === $this->config->getBytes()){
+                if($size === $this->_tConfig->getBytes()){
                     return;
                 }
             case Config\FileSizeValidatorConfig::OPERATOR_GT:
-                if($size > $this->config->getBytes()){
+                if($size > $this->_tConfig->getBytes()){
                     return;
                 }
             case Config\FileSizeValidatorConfig::OPERATOR_GTE:
-                if($size >= $this->config->getBytes()){
+                if($size >= $this->_tConfig->getBytes()){
                     return;
                 }
             case Config\FileSizeValidatorConfig::OPERATOR_LT:
-                if($size < $this->config->getBytes()){
+                if($size < $this->_tConfig->getBytes()){
                     return;
                 }
             case Config\FileSizeValidatorConfig::OPERATOR_LTE:
-                if($size <= $this->config->getBytes()){
+                if($size <= $this->_tConfig->getBytes()){
                     return;
                 }
         }
@@ -60,8 +82,8 @@ class FileSizeValidator implements ValidatorInterface, NegatedValidatorInterface
                 'File size of: "%s" (size: %s), is not "%s" than %s bytes',
                 $path,
                 $size,
-                $this->config->getOperator(),
-                $this->config->getBytes()
+                $this->_tConfig->getOperator(),
+                $this->_tConfig->getBytes()
             )
         );
     }
@@ -70,26 +92,26 @@ class FileSizeValidator implements ValidatorInterface, NegatedValidatorInterface
     {
         $size = filesize($path);
 
-        switch($this->config->getOperator()){
+        switch($this->_tConfig->getOperator()){
 
             case Config\FileSizeValidatorConfig::OPERATOR_EQ:
-                if($size !== $this->config->getBytes()){
+                if($size !== $this->_tConfig->getBytes()){
                     return;
                 }
             case Config\FileSizeValidatorConfig::OPERATOR_GT:
-                if($size < $this->config->getBytes()){
+                if($size < $this->_tConfig->getBytes()){
                     return;
                 }
             case Config\FileSizeValidatorConfig::OPERATOR_GTE:
-                if($size <= $this->config->getBytes()){
+                if($size <= $this->_tConfig->getBytes()){
                     return;
                 }
             case Config\FileSizeValidatorConfig::OPERATOR_LT:
-                if($size > $this->config->getBytes()){
+                if($size > $this->_tConfig->getBytes()){
                     return;
                 }
             case Config\FileSizeValidatorConfig::OPERATOR_LTE:
-                if($size >= $this->config->getBytes()){
+                if($size >= $this->_tConfig->getBytes()){
                     return;
                 }
         }
@@ -99,20 +121,22 @@ class FileSizeValidator implements ValidatorInterface, NegatedValidatorInterface
                 'File size of: "%s" (size: %s), is "%s" than %s bytes',
                 $path,
                 $size,
-                $this->config->getOperator(),
-                $this->config->getBytes()
+                $this->_tConfig->getOperator(),
+                $this->_tConfig->getBytes()
             )
         );
     }
 
     /**
      * @param ValidatorConfigInterface $config
+     * @param bool $negated
+     * @param string|null $description
      * @return ValidatorInterface
      * @throws \InvalidArgumentException
      */
-    public static function fromConfig(ValidatorConfigInterface $config): ValidatorInterface
+    public static function fromConfig(ValidatorConfigInterface $config, bool $negated = false, string $description=null): ValidatorInterface
     {
-        if(false === $config instanceof Config\HasRegexContentValidatorConfig){
+        if(false === $config instanceof Config\FileSizeValidatorConfig){
             $msg = sprintf(
                 'Config expected to be %s, config of class %s was given',
                 __CLASS__,
@@ -127,15 +151,8 @@ class FileSizeValidator implements ValidatorInterface, NegatedValidatorInterface
         return new self(
             $config->getBytes(),
             $config->getOperator(),
-            $config->isStrict()
+            $negated,
+            $description
         );
-    }
-
-    /**
-     * @return Config\FileSizeValidatorConfig
-     */
-    public function getConfig(): Config\FileSizeValidatorConfig
-    {
-        return $this->config;
     }
 }

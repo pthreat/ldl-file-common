@@ -6,22 +6,27 @@ use LDL\Validators\HasValidatorResultInterface;
 use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\NegatedValidatorInterface;
 use LDL\Validators\ResetValidatorInterface;
+use LDL\Validators\Traits\NegatedValidatorTrait;
+use LDL\Validators\Traits\ValidatorHasConfigInterfaceTrait;
 use LDL\Validators\Traits\ValidatorValidateTrait;
+use LDL\Validators\ValidatorHasConfigInterface;
 use LDL\Validators\ValidatorInterface;
 
-class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorInterface, HasValidatorResultInterface, ResetValidatorInterface
+class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorInterface, HasValidatorResultInterface, ResetValidatorInterface, ValidatorHasConfigInterface
 {
     use ValidatorValidateTrait {validate as _validate;}
-
-    /**
-     * @var Config\HasRegexContentValidatorConfig
-     */
-    private $config;
+    use ValidatorHasConfigInterfaceTrait;
+    use NegatedValidatorTrait;
 
     /**
      * @var array
      */
     private $lines;
+
+    /**
+     * @var string|null
+     */
+    private $description;
 
     /**
      *
@@ -32,24 +37,21 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
      * @param string $regex
      * @param bool $storeLine
      * @param bool $negated
-     * @param bool $dumpable
      * @param string|null $description
      */
     public function __construct(
         string $regex,
         bool $storeLine = true,
         bool $negated=false,
-        bool $dumpable=true,
         string $description=null
     )
     {
-        $this->config = new Config\HasRegexContentValidatorConfig(
+        $this->_tConfig = new Config\HasRegexContentValidatorConfig(
             $regex,
-            $storeLine,
-            $negated,
-            $dumpable,
-            $description
+            $storeLine
         );
+        $this->_tNegated = $negated;
+        $this->description = $description;
     }
 
     public function reset()
@@ -57,18 +59,47 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
         $this->lines = null;
     }
 
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        if(!$this->description){
+            return sprintf(
+                'File content must match with regex: %s',
+                $this->_tConfig->getRegex()
+            );
+        }
+
+        return $this->description;
+    }
+
+    /**
+     * @param mixed $path
+     * @throws \RuntimeException
+     */
+    public function validate($path): void
+    {
+        if(!is_readable($path)){
+            $msg = "Could not open file \"$path\" in rb mode!\n";
+            throw new \RuntimeException($msg);
+        }
+
+        $this->_validate($path);
+    }
+
     public function assertTrue($path): void
     {
-        $fp = $this->initializeValidation($path);
+        $fp = @fopen($path, 'rb');
         $lineNo = 0;
         $hasMatches = false;
 
         while($line = fgets($fp)){
             $lineNo++;
 
-            if(preg_match($this->config->getRegex(), $line)){
+            if(preg_match($this->_tConfig->getRegex(), $line)){
                 $hasMatches = true;
-                $this->lines[] = true === $this->config->isStoreLine() ? ['number' => $lineNo, 'line' => $line] : ['number' => $lineNo];
+                $this->lines[] = true === $this->_tConfig->isStoreLine() ? ['number' => $lineNo, 'line' => $line] : ['number' => $lineNo];
             }
         }
 
@@ -83,16 +114,16 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
 
     public function assertFalse($path): void
     {
-        $fp = $this->initializeValidation($path);
+        $fp = @fopen($path, 'rb');
         $lineNo = 0;
         $hasMatches = false;
 
         while($line = fgets($fp)){
             $lineNo++;
 
-            if(preg_match($this->config->getRegex(), $line)){
+            if(preg_match($this->_tConfig->getRegex(), $line)){
                 $hasMatches = true;
-                $this->lines[] = true === $this->config->isStoreLine() ? ['number' => $lineNo, 'line' => $line] : ['number' => $lineNo];
+                $this->lines[] = true === $this->_tConfig->isStoreLine() ? ['number' => $lineNo, 'line' => $line] : ['number' => $lineNo];
             }
         }
 
@@ -112,10 +143,12 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
 
     /**
      * @param ValidatorConfigInterface $config
+     * @param bool $negated
+     * @param string|null $description
      * @return ValidatorInterface
      * @throws \InvalidArgumentException
      */
-    public static function fromConfig(ValidatorConfigInterface $config): ValidatorInterface
+    public static function fromConfig(ValidatorConfigInterface $config, bool $negated = false, string $description=null): ValidatorInterface
     {
         if(false === $config instanceof Config\HasRegexContentValidatorConfig){
             $msg = sprintf(
@@ -132,33 +165,8 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
         return new self(
             $config->getRegex(),
             $config->isStoreLine(),
-            $config->isNegated(),
-            $config->isDumpable(),
-            $config->getDescription()
+            $negated,
+            $description
         );
-    }
-
-    /**
-     * @return Config\HasRegexContentValidatorConfig
-     */
-    public function getConfig(): Config\HasRegexContentValidatorConfig
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param $path
-     * @return bool|resource
-     */
-    private function initializeValidation($path)
-    {
-        $fp = @fopen($path, 'rb');
-
-        if(!$fp){
-            $msg = "Could not open file \"$path\" in rb mode!\n";
-            throw new \RuntimeException($msg);
-        }
-
-        return $fp;
     }
 }
