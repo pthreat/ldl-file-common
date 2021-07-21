@@ -2,7 +2,6 @@
 
 namespace LDL\File\Collection;
 
-use LDL\File\Validator\Config\FileTypeValidatorConfig;
 use LDL\File\Validator\FileTypeValidator;
 use LDL\Type\Collection\AbstractCollection;
 use LDL\Type\Collection\Traits\Validator\AppendValueValidatorChainTrait;
@@ -16,7 +15,7 @@ final class DirectoryCollection extends AbstractCollection
         parent::__construct($items);
 
         $this->getAppendValueValidatorChain()
-            ->append(new FileTypeValidator([FileTypeValidatorConfig::FILE_TYPE_DIRECTORY]))
+            ->append(new FileTypeValidator([FileTypeValidator::FILE_TYPE_DIRECTORY]))
             ->lock();
     }
 }

@@ -2,10 +2,8 @@
 
 namespace LDL\File\Validator;
 
-use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\NegatedValidatorInterface;
 use LDL\Validators\Traits\NegatedValidatorTrait;
-use LDL\Validators\Traits\ValidatorHasConfigInterfaceTrait;
 use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorHasConfigInterface;
 use LDL\Validators\ValidatorInterface;
@@ -13,8 +11,12 @@ use LDL\Validators\ValidatorInterface;
 class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface, ValidatorHasConfigInterface
 {
     use ValidatorValidateTrait;
-    use ValidatorHasConfigInterfaceTrait;
     use NegatedValidatorTrait;
+
+    /**
+     * @var string
+     */
+    private $filename;
 
     /**
      * @var string|null
@@ -27,9 +29,17 @@ class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface
         string $description=null
     )
     {
-        $this->_tConfig = new Config\FileNameValidatorConfig($filename);
+        $this->filename = $filename;
         $this->_tNegated = $negated;
         $this->description = $description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilename(): string
+    {
+        return $this->filename;
     }
 
     /**
@@ -40,7 +50,7 @@ class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface
         if(!$this->description){
             return sprintf(
                 'File name must match with: %s',
-                $this->_tConfig->getFilename()
+                $this->filename
             );
         }
 
@@ -51,7 +61,7 @@ class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface
     {
         $file = new \SplFileInfo($path);
 
-        if($file->getFilename() === $this->_tConfig->getFilename()){
+        if($file->getFilename() === $this->filename){
             return;
         }
 
@@ -62,38 +72,46 @@ class FileNameValidator implements ValidatorInterface, NegatedValidatorInterface
     {
         $file = new \SplFileInfo($path);
 
-        if($file->getFilename() !== $this->_tConfig->getFilename()){
+        if($file->getFilename() !== $this->filename){
             return;
         }
 
         throw new \LogicException("File: \"$path\" match criteria");
     }
 
-    /**
-     * @param ValidatorConfigInterface $config
-     * @param bool $negated
-     * @param string|null $description
-     * @return ValidatorInterface
-     * @throws \InvalidArgumentException
-     */
-    public static function fromConfig(ValidatorConfigInterface $config, bool $negated = false, string $description=null): ValidatorInterface
+    public function jsonSerialize(): array
     {
-        if(false === $config instanceof Config\FileNameValidatorConfig){
-            $msg = sprintf(
-                'Config expected to be %s, config of class %s was given',
-                __CLASS__,
-                get_class($config)
-            );
-            throw new \InvalidArgumentException($msg);
+        return $this->getConfig();
+    }
+
+    /**
+     * @param array $data
+     * @return ValidatorInterface
+     * @throws Exception\FileValidatorException
+     */
+    public static function fromConfig(array $data = []): ValidatorInterface
+    {
+        if(!array_key_exists('filename', $data)){
+            $msg = sprintf("Missing property 'filename' in %s", __CLASS__);
+            throw new Exception\FileValidatorException($msg);
         }
 
-        /**
-         * @var Config\FileNameValidatorConfig $config
-         */
         return new self(
-            $config->getFilename(),
-            $negated,
-            $description
+            $data['filename'],
+            array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
+            $data['description'] ?? null
         );
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return [
+            'filename' => $this->filename,
+            'negated' => $this->_tNegated,
+            'description' => $this->getDescription()
+        ];
     }
 }

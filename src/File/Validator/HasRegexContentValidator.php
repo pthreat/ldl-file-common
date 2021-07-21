@@ -2,12 +2,11 @@
 
 namespace LDL\File\Validator;
 
+use LDL\Framework\Helper\RegexHelper;
 use LDL\Validators\HasValidatorResultInterface;
-use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\NegatedValidatorInterface;
 use LDL\Validators\ResetValidatorInterface;
 use LDL\Validators\Traits\NegatedValidatorTrait;
-use LDL\Validators\Traits\ValidatorHasConfigInterfaceTrait;
 use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorHasConfigInterface;
 use LDL\Validators\ValidatorInterface;
@@ -15,8 +14,17 @@ use LDL\Validators\ValidatorInterface;
 class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorInterface, HasValidatorResultInterface, ResetValidatorInterface, ValidatorHasConfigInterface
 {
     use ValidatorValidateTrait {validate as _validate;}
-    use ValidatorHasConfigInterfaceTrait;
     use NegatedValidatorTrait;
+
+    /**
+     * @var string
+     */
+    private $regex;
+
+    /**
+     * @var bool
+     */
+    private $storeLine;
 
     /**
      * @var array
@@ -46,10 +54,10 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
         string $description=null
     )
     {
-        $this->_tConfig = new Config\HasRegexContentValidatorConfig(
-            $regex,
-            $storeLine
-        );
+        RegexHelper::validate($regex);
+
+        $this->regex = $regex;
+        $this->storeLine = $storeLine;
         $this->_tNegated = $negated;
         $this->description = $description;
     }
@@ -62,12 +70,28 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
     /**
      * @return string
      */
+    public function getRegex(): string
+    {
+        return $this->regex;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStoreLine(): bool
+    {
+        return $this->storeLine;
+    }
+
+    /**
+     * @return string
+     */
     public function getDescription(): string
     {
         if(!$this->description){
             return sprintf(
                 'File content must match with regex: %s',
-                $this->_tConfig->getRegex()
+                $this->regex
             );
         }
 
@@ -97,9 +121,9 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
         while($line = fgets($fp)){
             $lineNo++;
 
-            if(preg_match($this->_tConfig->getRegex(), $line)){
+            if(preg_match($this->regex, $line)){
                 $hasMatches = true;
-                $this->lines[] = true === $this->_tConfig->isStoreLine() ? ['number' => $lineNo, 'line' => $line] : ['number' => $lineNo];
+                $this->lines[] = true === $this->storeLine ? ['number' => $lineNo, 'line' => $line] : ['number' => $lineNo];
             }
         }
 
@@ -121,9 +145,9 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
         while($line = fgets($fp)){
             $lineNo++;
 
-            if(preg_match($this->_tConfig->getRegex(), $line)){
+            if(preg_match($this->regex, $line)){
                 $hasMatches = true;
-                $this->lines[] = true === $this->_tConfig->isStoreLine() ? ['number' => $lineNo, 'line' => $line] : ['number' => $lineNo];
+                $this->lines[] = true === $this->storeLine ? ['number' => $lineNo, 'line' => $line] : ['number' => $lineNo];
             }
         }
 
@@ -141,32 +165,45 @@ class HasRegexContentValidator implements ValidatorInterface, NegatedValidatorIn
         return $this->lines;
     }
 
-    /**
-     * @param ValidatorConfigInterface $config
-     * @param bool $negated
-     * @param string|null $description
-     * @return ValidatorInterface
-     * @throws \InvalidArgumentException
-     */
-    public static function fromConfig(ValidatorConfigInterface $config, bool $negated = false, string $description=null): ValidatorInterface
+    public function jsonSerialize(): array
     {
-        if(false === $config instanceof Config\HasRegexContentValidatorConfig){
-            $msg = sprintf(
-                'Config expected to be %s, config of class %s was given',
-                __CLASS__,
-                get_class($config)
-            );
-            throw new \InvalidArgumentException($msg);
+        return $this->getConfig();
+    }
+
+    /**
+     * @param array $data
+     * @return ValidatorInterface
+     * @throws Exception\FileValidatorException
+     */
+    public static function fromConfig(array $data = []): ValidatorInterface
+    {
+        if(false === array_key_exists('regex', $data)){
+            $msg = sprintf("Missing property 'regex' in %s", __CLASS__);
+            throw new Exception\FileValidatorException($msg);
         }
 
-        /**
-         * @var Config\HasRegexContentValidatorConfig $config
-         */
-        return new self(
-            $config->getRegex(),
-            $config->isStoreLine(),
-            $negated,
-            $description
-        );
+        try{
+            return new self(
+                (string) $data['regex'],
+                array_key_exists('storeLine', $data) ? (bool) $data['storeLine'] : true,
+                array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
+                $data['description'] ?? null
+            );
+        }catch(\Exception $e){
+            throw new Exception\FileValidatorException($e->getMessage());
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return [
+            'regex' => $this->regex,
+            'storeLine' => $this->storeLine,
+            'negated' => $this->_tNegated,
+            'description' => $this->getDescription()
+        ];
     }
 }
