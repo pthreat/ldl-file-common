@@ -2,10 +2,8 @@
 
 namespace LDL\File\Validator;
 
-use LDL\Validators\Config\ValidatorConfigInterface;
 use LDL\Validators\NegatedValidatorInterface;
 use LDL\Validators\Traits\NegatedValidatorTrait;
-use LDL\Validators\Traits\ValidatorHasConfigInterfaceTrait;
 use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorHasConfigInterface;
 use LDL\Validators\ValidatorInterface;
@@ -13,8 +11,12 @@ use LDL\Validators\ValidatorInterface;
 class FileExtensionValidator implements ValidatorInterface, NegatedValidatorInterface, ValidatorHasConfigInterface
 {
     use ValidatorValidateTrait;
-    use ValidatorHasConfigInterfaceTrait;
     use NegatedValidatorTrait;
+
+    /**
+     * @var string
+     */
+    private $extension;
 
     /**
      * @var string|null
@@ -27,9 +29,17 @@ class FileExtensionValidator implements ValidatorInterface, NegatedValidatorInte
         string $description=null
     )
     {
-        $this->_tConfig = new Config\FileExtensionValidatorConfig($extension);
+        $this->extension = $extension;
         $this->_tNegated = $negated;
         $this->description = $description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getExtension(): string
+    {
+        return $this->extension;
     }
 
     /**
@@ -40,7 +50,7 @@ class FileExtensionValidator implements ValidatorInterface, NegatedValidatorInte
         if(!$this->description){
             return sprintf(
                 'File extension must match with: %s',
-                $this->_tConfig->getExtension()
+                $this->extension
             );
         }
 
@@ -51,7 +61,7 @@ class FileExtensionValidator implements ValidatorInterface, NegatedValidatorInte
     {
         $file = new \SplFileInfo($path);
 
-        if($file->getExtension() === $this->_tConfig->getExtension()){
+        if($file->getExtension() === $this->extension){
             return;
         }
 
@@ -62,38 +72,46 @@ class FileExtensionValidator implements ValidatorInterface, NegatedValidatorInte
     {
         $file = new \SplFileInfo($path);
 
-        if($file->getExtension() !== $this->_tConfig->getExtension()){
+        if($file->getExtension() !== $this->extension){
             return;
         }
 
         throw new \LogicException("File: \"$path\" match criteria");
     }
 
-    /**
-     * @param ValidatorConfigInterface $config
-     * @param bool $negated
-     * @param string|null $description
-     * @return ValidatorInterface
-     * @throws \InvalidArgumentException
-     */
-    public static function fromConfig(ValidatorConfigInterface $config, bool $negated = false, string $description=null): ValidatorInterface
+    public function jsonSerialize(): array
     {
-        if(false === $config instanceof Config\FileExtensionValidatorConfig){
-            $msg = sprintf(
-                'Config expected to be %s, config of class %s was given',
-                __CLASS__,
-                get_class($config)
-            );
-            throw new \InvalidArgumentException($msg);
+        return $this->getConfig();
+    }
+
+    /**
+     * @param array $data
+     * @return ValidatorInterface
+     * @throws Exception\FileValidatorException
+     */
+    public static function fromConfig(array $data = []): ValidatorInterface
+    {
+        if(!array_key_exists('extension', $data)){
+            $msg = sprintf("Missing property 'extension' in %s", __CLASS__);
+            throw new Exception\FileValidatorException($msg);
         }
 
-        /**
-         * @var Config\FileExtensionValidatorConfig $config
-         */
         return new self(
-            $config->getExtension(),
-            $negated,
-            $description
+            $data['extension'],
+            array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
+            $data['description'] ?? null
         );
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return [
+            'extension' => $this->extension,
+            'negated' => $this->_tNegated,
+            'description' => $this->getDescription()
+        ];
     }
 }

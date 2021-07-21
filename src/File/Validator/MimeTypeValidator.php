@@ -2,11 +2,9 @@
 
 namespace LDL\File\Validator;
 
-use LDL\Validators\Config\ValidatorConfigInterface;
+use LDL\Type\Collection\Types\String\StringCollection;
 use LDL\Validators\NegatedValidatorInterface;
 use LDL\Validators\Traits\NegatedValidatorTrait;
-use LDL\Validators\Traits\ValidatorDescriptionTrait;
-use LDL\Validators\Traits\ValidatorHasConfigInterfaceTrait;
 use LDL\Validators\Traits\ValidatorValidateTrait;
 use LDL\Validators\ValidatorHasConfigInterface;
 use LDL\Validators\ValidatorInterface;
@@ -14,22 +12,57 @@ use LDL\Validators\ValidatorInterface;
 class MimeTypeValidator implements ValidatorInterface, NegatedValidatorInterface, ValidatorHasConfigInterface
 {
     use ValidatorValidateTrait;
-    use ValidatorHasConfigInterfaceTrait;
     use NegatedValidatorTrait;
-    use ValidatorDescriptionTrait;
+
+    /**
+     * @var StringCollection
+     */
+    private $types;
+
+    /**
+     * @var string|null
+     */
+    private $description;
 
     public function __construct($types, bool $negated=false, string $description=null)
     {
-        $this->_tConfig = new Config\MimeTypeValidatorConfig($types);
+        if(count($types) === 0){
+            throw new \InvalidArgumentException('The collection must have at least one mime type');
+        }
+
+        $this->types = new StringCollection($types);
         $this->_tNegated = $negated;
-        $this->_tDescription = $description ?? self::DESCRIPTION;
+        $this->description = $description;
+    }
+
+    /**
+     * @return StringCollection
+     */
+    public function getTypes(): StringCollection
+    {
+        return $this->types;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        if(!$this->description){
+            return sprintf(
+                'Mime type must be one of the following: %s',
+                $this->types->implode(', ')
+            );
+        }
+
+        return $this->description;
     }
 
     public function assertTrue($path): void
     {
         $mimeType = mime_content_type($path);
 
-        if($this->_tConfig->getTypes()->hasValue($mimeType)){
+        if($this->types->hasValue($mimeType)){
             return;
         }
 
@@ -37,7 +70,7 @@ class MimeTypeValidator implements ValidatorInterface, NegatedValidatorInterface
             sprintf(
                 '"%s" does not match given mime types: %s',
                 $path,
-                $this->_tConfig->getTypes()->implode(', ')
+                $this->types->implode(', ')
             )
         );
     }
@@ -46,44 +79,56 @@ class MimeTypeValidator implements ValidatorInterface, NegatedValidatorInterface
     {
         $mimeType = mime_content_type($path);
 
-        if(!$this->_tConfig->getTypes()->hasValue($mimeType)){
+        if(!$this->types->hasValue($mimeType)){
             return;
         }
 
         $msg = sprintf(
             '"%s" matches mime types: "%s"',
             $path,
-            $this->_tConfig->gettypes()->implode(', ')
+            $this->types->implode(', ')
         );
 
         throw new \LogicException($msg);
     }
 
-    /**
-     * @param ValidatorConfigInterface $config
-     * @param bool $negated
-     * @param string|null $description
-     * @return ValidatorInterface
-     * @throws \InvalidArgumentException
-     */
-    public static function fromConfig(ValidatorConfigInterface $config, bool $negated = false, string $description=null): ValidatorInterface
+    public function jsonSerialize(): array
     {
-        if(false === $config instanceof Config\MimeTypeValidatorConfig){
-            $msg = sprintf(
-                'Config expected to be %s, config of class %s was given',
-                __CLASS__,
-                get_class($config)
-            );
-            throw new \InvalidArgumentException($msg);
+        return $this->getConfig();
+    }
+
+    /**
+     * @param array $data
+     * @return ValidatorInterface
+     * @throws Exception\FileValidatorException
+     */
+    public static function fromConfig(array $data = []): ValidatorInterface
+    {
+        if(false === array_key_exists('types', $data)){
+            $msg = sprintf("Missing property 'types' in %s", __CLASS__);
+            throw new Exception\FileValidatorException($msg);
         }
 
-        /**
-         * @var Config\MimeTypeValidatorConfig $config
-         */
-        return new self(
-            $config->getTypes(),
-            $negated,
-            $description
-        );
+        try{
+            return new self(
+                $data['types'],
+                array_key_exists('negated', $data) ? (bool)$data['negated'] : false,
+                $data['description'] ?? null
+            );
+        }catch(\Exception $e){
+            throw new Exception\FileValidatorException($e->getMessage());
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return [
+            'types' => $this->types->toArray(),
+            'negated' => $this->_tNegated,
+            'description' => $this->getDescription()
+        ];
     }
 }
