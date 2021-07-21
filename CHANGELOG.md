@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- fix/1200637529087859 - Use ComparisonOperatorHelper on FileSizeValidator
 - fix/1200630491660400 - Remove validators config
 - fix/1200624131677611 - Fix validators - Remove dumpable and BasicValidatorConfig. Also add a description
 - fix/1200410494797363 - Fix HasRegexContentValidator
